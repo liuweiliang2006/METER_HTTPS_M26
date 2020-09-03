@@ -2168,6 +2168,12 @@ void StartDefaultTask(void const * argument)
 					GSM_ON_FLAG = 0;
 					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);						
 					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET);
+					if(IsNeedTimeing ==  true)
+					{
+						IsNeedTimeing = false;
+						printf("RTC is useful!\r\n");
+						PostCookingSecsion();
+					}
 					PostCookingSecsion();
 					
         }
