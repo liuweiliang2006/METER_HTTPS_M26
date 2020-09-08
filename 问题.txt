@@ -1,0 +1,19 @@
+1、代码中IsNeedTimeing和IsNeedSendCook有同时满足的情况？
+\GasMeter4\Src\freertos.c 中，该段代码，会出现IsNeedTimeing和IsNeedSendCook两标志位同时志位的情况。
+	if(GSM_ON_FLAG == 0)
+    {
+        //printf("key %d \r\n",tkeyValue);
+        //printf("CookingSessionSendNumber %d \r\n",REAL_DATA_Credit.CookingSessionSendNumber);
+        //printf("CookingSessionEnd %d \r\n",REAL_DATA_Credit.CookingSessionEnd);
+        if(REAL_DATA_Credit.CookingSessionSendNumber < REAL_DATA_Credit.CookingSessionEnd)
+        {
+            IsNeedSendCook = true;
+            //printf("OK %d \r\n",tkeyValue);
+        }
+
+							IsNeedTimeing = true;
+        connectStep = 0;
+        GSM_ON_FLAG = 1;
+        printf("Sim80x_SetPower(true)2\r\n");
+        Sim80x_SetPower(true);
+    }

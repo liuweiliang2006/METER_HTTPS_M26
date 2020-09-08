@@ -30,7 +30,8 @@ typedef struct
 	char CREDIT_SESSION_END[13];     //结束的金钱
 	char UnitPrice[8];               //当前单价 Unit price.unit(T/KG).
 	char GasDensity[6];              //当前液化气密度  Density.unit(KG/M3). 2.072  (g/L) 
-	char datetime[13];    				   //日期            
+//	char datetime[13];    				   //日期  
+	char datetime[15];    				   //日期	
 	char verification[4]; 				   //校验值
 	char GAS_REMAINING[7];           //剩余重量
 }CookingSessionReport_t; //结束烹饪的结构体

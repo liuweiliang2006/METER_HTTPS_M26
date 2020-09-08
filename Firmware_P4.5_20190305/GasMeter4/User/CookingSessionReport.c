@@ -18,14 +18,16 @@ void refreshCookingSessionReport(CookingSessionReport_t *htPackage)
 	  //sumCnt = 0;
 	  long date,time;//UTC
 	  GetRTC(&time,&date);
-		char datatime[12];
-	  sprintf(datatime,"%08ld%04ld",date,time / 100);
+		char datatime[15];
+		sprintf(datatime,"%08ld%08ld",date,time );
+//	  sprintf(datatime,"%08ld%04ld",date,time / 100);
 //	stmerncpy(waringPackage->meterNumer,Sim80x.IMEI,15);
     strncpy(htPackage->meterNumer,CONFIG_Meter.MeterNo,10);
 	  //sumCnt += identCnt;
     sprintf(htPackage->identifier,"%04d",REAL_DATA_Credit.CookingSessionSendNumber);
 		//sumCnt += atoi(datatime);
-    strncpy(htPackage->datetime,datatime,12);
+		strncpy(htPackage->datetime,datatime,15);
+//    strncpy(htPackage->datetime,datatime,12);
     //strncpy(htPackage->verification,"234",3);
 }
 //编码

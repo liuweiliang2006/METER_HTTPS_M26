@@ -2166,16 +2166,54 @@ void StartDefaultTask(void const * argument)
 					//恢复与无线模组通讯的任务，并开始与AWS通信
 					//vTaskResume();
 					GSM_ON_FLAG = 0;
-					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);						
-					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET);
-					if(IsNeedTimeing ==  true)
+//					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);						
+//					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET);
+					
+					//发送做饭数据，该部分长按或RTC定时发送，
+					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
+					if(IsNeedSendCook == true) 
+					{
+						LL_VCC(1);
+						printf("Long press!\r\n");
+						PostCookingSecsion();
+					}
+					else if(IsNeedTimeing ==  true)
 					{
 						IsNeedTimeing = false;
 						printf("RTC is useful!\r\n");
 						PostCookingSecsion();
 					}
-					PostCookingSecsion();
-					
+//					if(IsNeedSendCook == true) 
+//					{
+//							if(REAL_DATA_Credit.CookingSessionEnd > REAL_DATA_Credit.CookingSessionSendNumber &&
+//							(
+//							 (IsReceivedCSRPReply == true && HAL_GetTick()-TimeForCurrStart > 1000 * 10)//如果收到回复也要等十秒
+//								 || (IsReceivedCSRPReply == false && IsSendedCSRP == false && HAL_GetTick()-TimeForCurrStart > 1000 * 10) //保证第一次可以进入
+//							)
+//							)
+//							 {
+//								 IsSendedCSRP = true;
+//									IsReceivedCSRPReply = false;
+//									LL_VCC(1);
+//									Cooking_Session_READ(REAL_DATA_Credit.CookingSessionSendNumber);//发送的时候从开始位置开始读取,发送成功,索引加一
+//									if(SendCookingSessionPacket() == true)//Send successfully internal do not process index,change to reply
+//									{
+//										LL_VCC(1);
+//										REAL_DATA_Credit_Write();//发送完cooking ,保存序号
+//									}
+//									TimeForCurrStart = HAL_GetTick();
+//							 }
+//							 else
+//							 {
+//										if(REAL_DATA_Credit.CookingSessionEnd == REAL_DATA_Credit.CookingSessionSendNumber)
+//										{
+//											IsNeedSendCook = false;
+//											TimeForCurrStart = HAL_GetTick();
+//										}
+//							 }
+//							
+//							IsSaveREAL_DATA_Credit = true;
+//						}										
         }
 
 //				printf("Lcd_Status %d\r\n",Lcd_Status);

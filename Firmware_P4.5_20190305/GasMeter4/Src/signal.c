@@ -2,6 +2,10 @@
 #include "Sim80x.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "exparameter.h"
+
+
+//extern REAL_DATA_Credit_t REAL_DATA_Credit; 
 
 //#include "cmsis_os.h"
 QueueHandle_t SendATQueue = NULL; 			//用于表示当前正在与无线通讯模组
@@ -289,6 +293,26 @@ static void M26_Sni_Init(void )
 	}
 }
 
+//时间格式转化
+void DataTimeFormat(char **destination,char *source)
+{
+	*destination = (char *) malloc(strlen("xxxx-xx-xxTxx:xx:xx.xxxZ")+2);
+	memset(*destination,0,strlen("xxxx-xx-xxTxx:xx:xx.xxxZ")+2);
+	
+	strncat(*destination,source,4); //年
+	strcat(*destination,"-");
+	strncat(*destination,source+4,2);//月
+	strcat(*destination,"-");
+	strncat(*destination,source+6,2);//日
+	strcat(*destination,"T");
+	strncat(*destination,source+8,2);//时
+	strcat(*destination,":");
+	strncat(*destination,source+10,2);//分
+	strcat(*destination,":");
+	strncat(*destination,source+12,2);//秒
+	strcat(*destination,".001Z\"");
+}
+
 //postcookingsecsion 发送函数
 void  PostCookingSecsion(void)
 {
@@ -296,49 +320,97 @@ void  PostCookingSecsion(void)
 	uint8_t result = 0 , i = 0; //用于标识，是否响应了当前的指令
 	char *ptUrl,*ptPost;
 	char *ptPostData;
+	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;
-	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
-	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
-	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+	
 	M26_Sni_Init();
-	
-	struSeverInfo->Sendsever = SEVER_URL;
-	u8UrlLength = strlen(struSeverInfo->Sendsever);
-	struSeverInfo->SeverVer = SEVER_VERSION;
-	struSeverInfo->CardID = "";
-	
-	printf("******PostCookingSecsion******");
-	struSeverInfo->MeterId = "meter/settings/TZ00000235";
-	ptPostData = "{\"command\":\"STUP\",\
-	\"serverIPaddress\": \"198.51.100.42\",\
-	\"serverPort\": 5070,\
-	\"serverURL\": \"https//xxxxx/xxxx\",\
-	\"gasLevel\": 9800,\
-	\"dataUploadPeriod\": 360,\
-	\"warningLowBatteryVoltage\": 4.5,\
-	\"warningLowCreditBalance\": 80,\
-	\"warningLowGasVolumeAlarm\": 2000,\
-	\"metercurrency\": \"KSH\",\
-	\"uploadFrequency\": 360,\
-	\"uploadTime\": 0,\
-	\"sensorSlope\": 2.3,\
-	\"sensorIntercept\": 0.1,\
-	\"settingDatestamp\": \"2016-08-29T09:12:33.001Z\"}";		
-	ptUrl = Sever_Address_GET( struSeverInfo,"");
-	printf("Sever_Address_GET\r\n");
-	Send_AT_cmd[9].SendCommand = ptUrl;
-	u8UrlLength = strlen(ptUrl)-2;
-	CmdLength(u8UrlLength,9);  //根据发送URL的长度		
-	ptPost = Post_Data_Cmd( ptPostData);
-	Send_AT_cmd[15].SendCommand = ptPost;
-	u8UrlLength = strlen(ptPost)-2;
-	CmdLength(u8UrlLength,15);  //根据发送POST的长度
-	SendPostCommand();
-	free(ptUrl);
-	free(ptPost);
-	free(Send_AT_cmd[8].SendCommand);
-	free(Send_AT_cmd[14].SendCommand);
-	printf("******end PostCookingSecsion******");
+
+	while(REAL_DATA_Credit.CookingSessionSendNumber < REAL_DATA_Credit.CookingSessionEnd)
+	{
+		Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+		Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+		struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+		
+		printf("compare %d %d\r\n",REAL_DATA_Credit.CookingSessionSendNumber,REAL_DATA_Credit.CookingSessionEnd);
+		printf("******PostCookingSecsion******");
+		Cooking_Session_READ(REAL_DATA_Credit.CookingSessionSendNumber);//发送的时候从开始位置开始读取,发送成功,索引加一
+		refreshCookingSessionReport(&CookingSessionReport);
+		ptPostData = (char *) malloc(350 *sizeof(char));
+		memset(ptPostData,0,350 *sizeof(char));
+		
+		strcat(ptPostData,"{\"cookingSessionId\":\"220erbdsbudwofjewo4234fdwb\",");
+		
+		strcat(ptPostData,"\"startTime\":\"");
+		DataTimeFormat(&cDataTime,CookingSessionReport.SESSION_END_TIME);
+		strcat(ptPostData,cDataTime);
+		strcat(ptPostData,",");
+		free(cDataTime);
+		
+		strcat(ptPostData,"\"endTime\":\"");
+		DataTimeFormat(&cDataTime,CookingSessionReport.SESSION_START_TIME);
+		strcat(ptPostData,cDataTime);
+		strcat(ptPostData,",");
+		free(cDataTime);
+		
+		strcat(ptPostData,"\"endReason\":");
+		strcat(ptPostData,CookingSessionReport.SESSION_END_TYPE);
+		strcat(ptPostData,",");
+		
+		strcat(ptPostData,"\"endCumulativeMass\":");
+		strcat(ptPostData,CookingSessionReport.END_CUMULATIVE_VOLUME);
+		strcat(ptPostData,",");
+		
+		strcat(ptPostData,"\"startCumulativeMass\":");
+		strcat(ptPostData,CookingSessionReport.START_CUMULATIVE_VOLUME);
+		strcat(ptPostData,",");
+		
+		strcat(ptPostData,"\"startCredit\":");
+		strcat(ptPostData,CookingSessionReport.CREDIT_SESSION_START);
+		strcat(ptPostData,",");
+		
+		strcat(ptPostData,"\"endCredit\":");
+		strcat(ptPostData,CookingSessionReport.CREDIT_SESSION_END);
+		strcat(ptPostData,",");
+		
+		
+		strcat(ptPostData,"\"gasRemaining\":");
+		strcat(ptPostData,CookingSessionReport.GAS_REMAINING);
+		strcat(ptPostData,",");
+		
+		strcat(ptPostData,"\"csrpTimestamp\":\"");
+		DataTimeFormat(&cDataTime,CookingSessionReport.datetime);
+		strcat(ptPostData,cDataTime);
+		free(cDataTime);
+		strcat(ptPostData,"}");		
+
+		struSeverInfo->Sendsever = SEVER_URL;
+		u8UrlLength = strlen(struSeverInfo->Sendsever);
+		struSeverInfo->SeverVer = SEVER_VERSION;
+		struSeverInfo->CardID = "/9088450934850394385";
+		struSeverInfo->MeterId = "meter/cookingSession/TZ00000235";
+		ptUrl = Sever_Address_GET( struSeverInfo,"");
+		printf("Sever_Address_GET\r\n");
+		Send_AT_cmd[9].SendCommand = ptUrl;
+		u8UrlLength = strlen(ptUrl)-2;
+		CmdLength(u8UrlLength,9);  //根据发送URL的长度		
+		ptPost = Post_Data_Cmd( ptPostData);
+		Send_AT_cmd[15].SendCommand = ptPost;
+		u8UrlLength = strlen(ptPost)-2;
+		CmdLength(u8UrlLength,15);  //根据发送POST的长度
+		SendPostCommand();
+		free(ptUrl);
+		free(ptPost);
+		free(Send_AT_cmd[8].SendCommand);
+//		free(Send_AT_cmd[9].SendCommand);
+		free(Send_AT_cmd[14].SendCommand);		
+		free(ptPostData);
+		
+		REAL_DATA_Credit.CookingSessionSendNumber++;
+		REAL_DATA_Credit_Write();//发送完cooking ,保存序号
+		
+		printf("******end PostCookingSecsion******");
+	}
+
 }
 //######################################################################################################################
 
