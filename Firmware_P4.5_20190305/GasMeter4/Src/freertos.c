@@ -2173,6 +2173,7 @@ void StartDefaultTask(void const * argument)
 					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
 					if(IsNeedSendCook == true) 
 					{
+//						PostMeterStatus();
 						LL_VCC(1);
 						printf("Long press!\r\n");
 						PostCookingSecsion();
@@ -2180,8 +2181,27 @@ void StartDefaultTask(void const * argument)
 					else if(IsNeedTimeing ==  true)
 					{
 						IsNeedTimeing = false;
-						printf("RTC is useful!\r\n");
-						PostCookingSecsion();
+						if(IsSendHalfTime == false)
+						{
+							PostCookingSecsion();
+							IsSendHalfTime = true;
+							TimeForCurrStart = HAL_GetTick();		
+						}
+						else
+						{
+							if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
+							{
+								PostMeterStatus();
+								IsSendHalfTime = false;
+								IsNeedTimeing = false;
+								TimeForCurrStart = HAL_GetTick();
+							}
+						}
+						HearRetryNumber = 0;
+					}
+					else if(IsNeedWarning == true)//报警信息
+					{
+						
 					}
 //					if(IsNeedSendCook == true) 
 //					{

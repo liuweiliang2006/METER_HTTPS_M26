@@ -6,3 +6,6 @@ V1.1 修改 PostCookingSecsion函数中 下面三条指令的位置 ，放在whi
 Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+
+20200908 1812
+新建文件 encode.c encode.h,并集成函数PostMeterStatus

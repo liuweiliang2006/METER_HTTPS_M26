@@ -19,8 +19,8 @@ void refreshReportStatePacket(reportStatePacket_t *rPacket)
 	  //sumCnt = 0;
 		long date,time;//UTC
 	  GetRTC(&time,&date);
-		char datatime[12];
-	  sprintf(datatime,"%08ld%04ld",date,time / 100);
+		char datatime[15];
+	  sprintf(datatime,"%08ld%08ld",date,time / 100);
     strncpy(rPacket->meterNumer,CONFIG_Meter.MeterNo,10);
 	  //sumCnt += identCnt;
     sprintf(rPacket->identifier,"%04d",identCnt++);
@@ -43,7 +43,7 @@ void refreshReportStatePacket(reportStatePacket_t *rPacket)
 		
 	  sprintf(rPacket->GAS_TEMPERATURE,"%2d",25);
     //sumCnt += atoi(datatime);
-    strncpy(rPacket->datetime,datatime,12);
+    strncpy(rPacket->datetime,datatime,15);
     //strncpy(rPacket->verification,"234",3);
 }
 //TOTAL

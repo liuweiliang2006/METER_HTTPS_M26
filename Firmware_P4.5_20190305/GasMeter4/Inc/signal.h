@@ -31,6 +31,7 @@ extern SemaphoreHandle_t  Semaphore_Uart_Rec;
 void AppObjCreate (void);
 
 void  PostCookingSecsion(void);
+void  PostMeterStatus(void);
 
 uint8_t Analysis_AT_Cmd(char *pdata);
 uint8_t Analysis_CSQ_Cmd(char *pdata);

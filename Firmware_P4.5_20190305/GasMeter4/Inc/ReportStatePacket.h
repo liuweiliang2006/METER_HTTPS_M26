@@ -29,7 +29,7 @@ typedef struct
 	  char tank_Lock_status[2];     
 	  char GSM_signal_intensity[3]; 
 	  char GAS_TEMPERATURE[3];      
-    char datetime[13];             
+    char datetime[15];             
     char verification[4]; 
 } reportStatePacket_t; 
 

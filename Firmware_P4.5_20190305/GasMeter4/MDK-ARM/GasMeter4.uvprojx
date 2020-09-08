@@ -647,6 +647,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\signal.c</FilePath>
             </File>
+            <File>
+              <FileName>encode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\encode.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1474,6 +1479,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\signal.c</FilePath>
             </File>
+            <File>
+              <FileName>encode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\encode.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2300,6 +2310,11 @@
               <FileName>signal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\signal.c</FilePath>
+            </File>
+            <File>
+              <FileName>encode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\encode.c</FilePath>
             </File>
           </Files>
         </Group>
