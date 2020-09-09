@@ -2176,7 +2176,8 @@ void StartDefaultTask(void const * argument)
 //						PostMeterStatus();
 						LL_VCC(1);
 						printf("Long press!\r\n");
-						PostCookingSecsion();
+//						PostMeterWarning();
+//						PostCookingSecsion();
 					}
 					else if(IsNeedTimeing ==  true)
 					{
@@ -2201,7 +2202,13 @@ void StartDefaultTask(void const * argument)
 					}
 					else if(IsNeedWarning == true)//±¨¾¯ÐÅÏ¢
 					{
-						
+						if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
+						{
+							PostMeterWarning();
+							IsNeedWarning = false;
+							TimeForCurrStart = HAL_GetTick();
+						}
+						HearRetryNumber = 0;
 					}
 //					if(IsNeedSendCook == true) 
 //					{

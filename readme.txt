@@ -9,3 +9,6 @@ struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
 
 20200908 1812
 新建文件 encode.c encode.h,并集成函数PostMeterStatus
+
+20200909 0942
+集成PostMeterWarning功能，累积共集成PostMeterStatus、PostMeterWarning、PostCookingSecsion

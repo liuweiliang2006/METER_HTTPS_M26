@@ -595,9 +595,8 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	memset(ptPostData,0,350 *sizeof(char));
 	
 	printf("******PostMeterStatus******");
-	Cooking_Session_READ(REAL_DATA_Credit.CookingSessionSendNumber);//发送的时候从开始位置开始读取,发送成功,索引加一
-	refreshReportStatePacket(&reportStatePacket);	
 	
+	refreshReportStatePacket(&reportStatePacket);		
 	encodeMeterStatusPacket(&ptPostData,&reportStatePacket); //组包 cookingsecsion POST的数据内容
 	
 	struSeverInfo->Sendsever = SEVER_URL;
@@ -622,10 +621,58 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);
 	free(Send_AT_cmd[14].SendCommand);		
-	free(ptPostData);
-	
+	free(ptPostData);	
 	
 	printf("******end PostMeterStatus******");
+
+}
+
+//PostMeterWarning 发送函数
+void  PostMeterWarning(void)  //SendWarnPacket();
+{
+	Stru_Sever_Info_t *struSeverInfo;
+	uint8_t result = 0 , i = 0; //用于标识，是否响应了当前的指令
+	char *ptUrl,*ptPost;
+	char *ptPostData;
+	char *cDataTime ;
+	volatile uint16_t u8UrlLength = 0;	
+	
+	M26_Sni_Init();
+	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+	ptPostData = (char *) malloc(500 *sizeof(char));
+	memset(ptPostData,0,500 *sizeof(char));
+	
+	printf("******PostMeterWarning******");
+	refreshWaringPacket(&waringPacket);
+	encodeWarningsPacket(&ptPostData,&waringPacket); //组包 cookingsecsion POST的数据内容
+	
+	struSeverInfo->Sendsever = SEVER_URL;
+	u8UrlLength = strlen(struSeverInfo->Sendsever);
+	struSeverInfo->SeverVer = SEVER_VERSION;
+	struSeverInfo->CardID = "";
+	struSeverInfo->MeterId = "meter/warning/TZ00000111";
+	ptUrl = Sever_Address_GET( struSeverInfo,"");
+	
+	Send_AT_cmd[9].SendCommand = ptUrl; //URL地址
+	u8UrlLength = strlen(ptUrl)-2;
+	CmdLength(u8UrlLength,9);  //根据发送URL的长度		获取URL的长度添充AT+QHTTPURL=XX,60
+	
+	ptPost = Post_Data_Cmd( ptPostData);
+	Send_AT_cmd[15].SendCommand = ptPost;
+	u8UrlLength = strlen(ptPost)-2;
+	CmdLength(u8UrlLength,15);  //根据发送POST的长度
+	
+	SendPostCommand();
+	
+	free(ptUrl);
+	free(ptPost);
+	free(Send_AT_cmd[8].SendCommand);
+	free(Send_AT_cmd[14].SendCommand);		
+	free(ptPostData);	
+	
+	printf("******end PostMeterWarning******");
 
 }
 

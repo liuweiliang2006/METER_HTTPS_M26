@@ -21,7 +21,7 @@ void refreshWaringPacket(waringPacket_t *wPacket)
 		long date,time;//UTC
 	  GetRTC(&time,&date);
 		char datatime[12];
-	  sprintf(datatime,"%08ld%04ld",date,time / 100);
+	  sprintf(datatime,"%08ld%08ld",date,time / 100);
     strncpy(wPacket->meterNumer,CONFIG_Meter.MeterNo,10);
 
 //	  for(int i = 0;i<32;i++)
@@ -57,7 +57,7 @@ void refreshWaringPacket(waringPacket_t *wPacket)
 		//sumCnt += 25;
 	  sprintf(wPacket->GAS_TEMPERATURE,"%2d",25);
 		//sumCnt += atoi(datatime);
-    strncpy(wPacket->datetime,datatime,12);
+    strncpy(wPacket->datetime,datatime,15);
     //strncpy(wPacket->verification,"234",3);
 }
 //TOTAL

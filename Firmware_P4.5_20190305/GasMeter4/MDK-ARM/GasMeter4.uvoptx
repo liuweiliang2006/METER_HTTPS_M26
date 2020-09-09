@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
+          <Name>d</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>1923</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134267520</Address>
+          <Address>134267876</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -169,6 +169,22 @@
           <Filename>../Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\GasMeter4\../Src/freertos.c\1923</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>2179</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134269068</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Src/freertos.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\GasMeter4\../Src/freertos.c\2179</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

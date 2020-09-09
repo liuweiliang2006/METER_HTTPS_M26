@@ -31,7 +31,7 @@ typedef struct
 	  char tank_Lock_status[2];     //锁的状态
 	  char GSM_signal_intensity[3]; //GSM信号的值
 	  char GAS_TEMPERATURE[3];      //温度的值
-    char datetime[13];    //日期            
+    char datetime[15];    //日期            
     char verification[4]; //校验值
 } waringPacket_t; //报警的结构体
 
