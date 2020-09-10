@@ -19,7 +19,7 @@ void refreshInformationPacket(InformationPacket_t *rPacket)
 		long date,time;//UTC
 	  GetRTC(&time,&date);
 		char datatime[12];
-	  sprintf(datatime,"%08ld%04ld",date,time / 100);
+	  sprintf(datatime,"%08ld%08ld",date,time / 100);
     strncpy(rPacket->meterNumer,CONFIG_Meter.MeterNo,10);
 	  
     if(stringIsNull(REAL_DATA_PARAM.CURR_CUSTOMER_ID,7) == FAILED)
@@ -50,7 +50,7 @@ void refreshInformationPacket(InformationPacket_t *rPacket)
 	  strncpy(rPacket->BATTERY_MODEL,CONFIG_Meter.BATTERY_MODEL,5);
 	  
 		//sumCnt += atoi(datatime);
-    strncpy(rPacket->datetime,datatime,12);
+    strncpy(rPacket->datetime,datatime,15);
 }
 
 void encodeInformationPacket(char *sendMeagess,InformationPacket_t *rPacket)

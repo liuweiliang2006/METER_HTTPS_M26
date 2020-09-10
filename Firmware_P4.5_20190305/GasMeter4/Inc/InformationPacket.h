@@ -28,7 +28,7 @@ typedef struct
     char UpdatePeriod[6];         //上传周期	
 	  char StartPeriod[6];          //周期开始时间
 	  char BATTERY_MODEL[6];
-    char datetime[13];                
+    char datetime[15];                
     char verification[4]; 
 } InformationPacket_t; 
 

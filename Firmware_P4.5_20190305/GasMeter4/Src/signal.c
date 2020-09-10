@@ -536,6 +536,8 @@ void  PostCookingSecsion(void)  //SendReportDataPacket
 	{
 		Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 		Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+		memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+		memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
 		struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
 		ptPostData = (char *) malloc(350 *sizeof(char));
 		memset(ptPostData,0,350 *sizeof(char));
@@ -590,6 +592,8 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+	memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
 	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
 	ptPostData = (char *) malloc(350 *sizeof(char));
 	memset(ptPostData,0,350 *sizeof(char));
@@ -640,6 +644,8 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+	memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
 	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
 	ptPostData = (char *) malloc(500 *sizeof(char));
 	memset(ptPostData,0,500 *sizeof(char));
@@ -673,6 +679,106 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	free(ptPostData);	
 	
 	printf("******end PostMeterWarning******");
+}
 
+//PostMeterHardware 发送函数
+void  PostMeterHardware(void)  //SendWarnPacket();
+{
+	Stru_Sever_Info_t *struSeverInfo;
+	uint8_t result = 0 , i = 0; //用于标识，是否响应了当前的指令
+	char *ptUrl,*ptPost;
+	char *ptPostData;
+	char *cDataTime ;
+	volatile uint16_t u8UrlLength = 0;	
+	
+	M26_Sni_Init();
+	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+	memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
+	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+	ptPostData = (char *) malloc(500 *sizeof(char));
+	memset(ptPostData,0,400 *sizeof(char));
+	
+	printf("******PostMeterHardware******");
+	refreshInformationPacket(&InformationPacket);
+	encodeHardwarePacket(&ptPostData,&InformationPacket); 
+	
+	struSeverInfo->Sendsever = SEVER_URL;
+	u8UrlLength = strlen(struSeverInfo->Sendsever);
+	struSeverInfo->SeverVer = SEVER_VERSION;
+	struSeverInfo->CardID = "";
+	struSeverInfo->MeterId = "meter/hardware/TZ00000131";
+	ptUrl = Sever_Address_GET( struSeverInfo,"");
+	
+	Send_AT_cmd[9].SendCommand = ptUrl; //URL地址
+	u8UrlLength = strlen(ptUrl)-2;
+	CmdLength(u8UrlLength,9);  //根据发送URL的长度		获取URL的长度添充AT+QHTTPURL=XX,60
+	
+	ptPost = Post_Data_Cmd( ptPostData);
+	Send_AT_cmd[15].SendCommand = ptPost;
+	u8UrlLength = strlen(ptPost)-2;
+	CmdLength(u8UrlLength,15);  //根据发送POST的长度
+	
+	SendPostCommand();
+	
+	free(ptUrl);
+	free(ptPost);
+	free(Send_AT_cmd[8].SendCommand);
+	free(Send_AT_cmd[14].SendCommand);		
+	free(ptPostData);	
+	
+	printf("******end PostMeterHardware******");
+}
+
+//PostMeterSettings 发送函数
+void  PostMeterSettings(void)  //
+{
+	Stru_Sever_Info_t *struSeverInfo;
+	uint8_t result = 0 , i = 0; //用于标识，是否响应了当前的指令
+	char *ptUrl,*ptPost;
+	char *ptPostData;
+	char *cDataTime ;
+	volatile uint16_t u8UrlLength = 0;	
+	
+	M26_Sni_Init();
+	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+	memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
+	
+	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+	ptPostData = (char *) malloc(500 *sizeof(char));
+	memset(ptPostData,0,500 *sizeof(char));
+	
+	printf("******PostMeterSettings******");
+	refreshSetupPacket(&SetupPacket);
+	encodeSettingsPacket(&ptPostData,&SetupPacket); 
+	
+	struSeverInfo->Sendsever = SEVER_URL;
+	u8UrlLength = strlen(struSeverInfo->Sendsever);
+	struSeverInfo->SeverVer = SEVER_VERSION;
+	struSeverInfo->CardID = "";
+	struSeverInfo->MeterId = "meter/settings/TZ00000525";
+	ptUrl = Sever_Address_GET( struSeverInfo,"");
+	
+	Send_AT_cmd[9].SendCommand = ptUrl; //URL地址
+	u8UrlLength = strlen(ptUrl)-2;
+	CmdLength(u8UrlLength,9);  //根据发送URL的长度		获取URL的长度添充AT+QHTTPURL=XX,60
+	
+	ptPost = Post_Data_Cmd( ptPostData);
+	Send_AT_cmd[15].SendCommand = ptPost;
+	u8UrlLength = strlen(ptPost)-2;
+	CmdLength(u8UrlLength,15);  //根据发送POST的长度
+	
+	SendPostCommand();
+	
+	free(ptUrl);
+	free(ptPost);
+	free(Send_AT_cmd[8].SendCommand);
+	free(Send_AT_cmd[14].SendCommand);		
+	free(ptPostData);	
+	
+	printf("******end PostMeterSettings******");
 }
 

@@ -20,13 +20,13 @@ void refreshSetupPacket(SetupPacket_t *sPacket)
 	  long date,time;//UTC
 	  GetRTC(&time,&date);
 		char datatime[12];
-	  sprintf(datatime,"%08ld%04ld",date,time / 100);
+	  sprintf(datatime,"%08ld%08ld",date,time / 100);
 //	stmerncpy(waringPackage->meterNumer,Sim80x.IMEI,15);
     strncpy(sPacket->meterNumer,CONFIG_Meter.MeterNo,10);
 	  //sumCnt += identCnt;
     //sprintf(sPacket->identifier,"%04d",identCnt++);
 	  //sumCnt += atoi(datatime);
-    strncpy(sPacket->datetime,datatime,12);
+    strncpy(sPacket->datetime,datatime,15);
     //strncpy(sPacket->verification,"234",3);
 }
 //编码设置回复包

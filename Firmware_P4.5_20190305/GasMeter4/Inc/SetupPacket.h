@@ -27,7 +27,7 @@ typedef struct
 	char LowGasVolume[6];					//低气量报警
 	char GAS_REMAINING[7];        //钢瓶的现在实际重量
 	char Currency[4];             //货币单位
-	char datetime[13];    				//日期            
+	char datetime[15];    				//日期            
 	char verification[4]; 				//校验值
 }SetupPacket_t; //设置的结构体
 

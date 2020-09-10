@@ -282,5 +282,127 @@ void encodeWarningsPacket(char **sendMeagess,waringPacket_t *rPacket)
 	strcat(*sendMeagess,"}");		
 }
 
+void encodeHardwarePacket(char **sendMeagess,InformationPacket_t *rPacket)
+{
+	char *cDataTime ;
+	strcat(*sendMeagess,"{\"pcbVersion\":\"");
+	strcat(*sendMeagess,rPacket->PCB_V);
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"mcuFirmwareVersion\":\"");
+	strcat(*sendMeagess,rPacket->FIRMWARE_V);
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"mcuFirmwareCompileDate\":\"");
+	strcat(*sendMeagess,"2016-08-29T09:12:33.001Z");
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"modemFirmwareVersion\":\"");
+	strcat(*sendMeagess,"1752B13SIM7029E");
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"batteryModel\":\"");
+	strcat(*sendMeagess,rPacket->BATTERY_MODEL);
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"batterySerialNumberList\":[\"");
+	strcat(*sendMeagess,"BAT 18650-00208\", \"BAT 18650-001223\"]");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"iflowSerialNumber\":\"");
+	strcat(*sendMeagess,"aaa22");
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"hardwareDatestamp\":\"");
+	DataTimeFormat(&cDataTime,rPacket->datetime);
+	strcat(*sendMeagess,cDataTime);
+	free(cDataTime);
+	
+	strcat(*sendMeagess,"}");		
+}
+
+
+void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
+{
+	char *cDataTime ;
+	
+	strcat(*sendMeagess,"{\"command\":\"STUP\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"serverIPaddress\":\"");
+	strcat(*sendMeagess,"198.51.100.42");
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"serverPort\":");
+	strcat(*sendMeagess,"5070");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"serverURL\":\"");
+	strcat(*sendMeagess,"https//xxxxx/xxxx");
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"gasLevel\":");
+	strcat(*sendMeagess,"9800");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"dataUploadPeriod\":");
+	strcat(*sendMeagess,"360");
+//	strcat(*sendMeagess,rPacket->UpdatePeriod);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"warningLowBatteryVoltage\":");
+	strcat(*sendMeagess,"4.5");
+//	strcat(*sendMeagess,rPacket->LowBattery);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"warningLowCreditBalance\":");
+	strcat(*sendMeagess,"80");
+//	strcat(*sendMeagess,rPacket->LowCredit);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"warningLowGasVolumeAlarm\":");
+	strcat(*sendMeagess,"2000");
+//	strcat(*sendMeagess,rPacket->LowGasVolume);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"metercurrency\":\"");
+	strcat(*sendMeagess,"KSH");
+//	strcat(*sendMeagess,rPacket->Currency);
+	strcat(*sendMeagess,"\"");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"uploadFrequency\":");
+	strcat(*sendMeagess,"360");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"uploadTime\":");
+	strcat(*sendMeagess,"0");
+//	strcat(*sendMeagess,rPacket->StartPeriod);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"sensorSlope\":");
+	strcat(*sendMeagess,"2.3");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"sensorIntercept\":");
+	strcat(*sendMeagess,"0.1");
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"settingDatestamp\":\"");
+	DataTimeFormat(&cDataTime,rPacket->datetime);
+	strcat(*sendMeagess,cDataTime);
+	free(cDataTime);
+	
+	strcat(*sendMeagess,"}");		
+}
+
 
 

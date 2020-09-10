@@ -17,3 +17,6 @@
         printf("Sim80x_SetPower(true)2\r\n");
         Sim80x_SetPower(true);
     }
+2、SendReportStatePacket （PostMeterStatus）放在了定时报当中。  2638行
+
+

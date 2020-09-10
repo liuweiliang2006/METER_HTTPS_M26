@@ -2171,15 +2171,17 @@ void StartDefaultTask(void const * argument)
 					
 					//发送做饭数据，该部分长按或RTC定时发送，
 					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
-					if(IsNeedSendCook == true) 
+					if(IsNeedSendCook == true)  //PostCookingSecsion
 					{
-//						PostMeterStatus();
+						PostMeterStatus();
 						LL_VCC(1);
 						printf("Long press!\r\n");
-//						PostMeterWarning();
-//						PostCookingSecsion();
+						PostMeterSettings();
+						PostMeterHardware();
+						PostMeterWarning();
+						PostCookingSecsion();
 					}
-					else if(IsNeedTimeing ==  true)
+					else if(IsNeedTimeing ==  true) //PostCookingSecsion
 					{
 						IsNeedTimeing = false;
 						if(IsSendHalfTime == false)
@@ -2192,7 +2194,7 @@ void StartDefaultTask(void const * argument)
 						{
 							if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
 							{
-								PostMeterStatus();
+								PostMeterStatus(); //PostMeterStatus
 								IsSendHalfTime = false;
 								IsNeedTimeing = false;
 								TimeForCurrStart = HAL_GetTick();
@@ -2200,14 +2202,23 @@ void StartDefaultTask(void const * argument)
 						}
 						HearRetryNumber = 0;
 					}
-					else if(IsNeedWarning == true)//报警信息
+					else if(IsNeedWarning == true)//报警信息 PostMeterWarning
 					{
 						if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
 						{
-							PostMeterWarning();
+							PostMeterWarning(); 
 							IsNeedWarning = false;
 							TimeForCurrStart = HAL_GetTick();
 						}
+						HearRetryNumber = 0;
+					}
+					else if(IsNeedInformationResponse == true) //PostMeterHardware
+					{
+						IsNeedInformationResponse = false;
+//						SendInformationPacket();
+						PostMeterHardware();
+						commandType = 0;
+						TimeForCurrStart = HAL_GetTick();
 						HearRetryNumber = 0;
 					}
 //					if(IsNeedSendCook == true) 
