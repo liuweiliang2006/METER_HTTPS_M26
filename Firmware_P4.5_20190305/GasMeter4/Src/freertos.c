@@ -71,6 +71,7 @@
 #include "OpenLockPacket.h"
 #include "iwdg.h"
 
+#include "event_groups.h"
 #include "signal.h"
 /* USER CODE END Includes */
 
@@ -476,7 +477,7 @@ void MX_FREERTOS_Init(void) {
     //没有狗等于假,说明有狗等于真,启动看门狗
     if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
     {
-//        MX_IWDG_Init();//每次自动生成后以后需要注释掉这一句,这是启动看门狗的代码,如果自启动大于27秒,需要关闭看门狗
+        MX_IWDG_Init();//每次自动生成后以后需要注释掉这一句,这是启动看门狗的代码,如果自启动大于27秒,需要关闭看门狗
     }
 		
     strcpy(CONFIG_Meter.FIRMWARE_V,GetSoftWareTime()); 
@@ -2158,54 +2159,51 @@ void StartDefaultTask(void const * argument)
 //				}
 //		}
 				
-				
+
         //printf("connectStep ----> %d\r\n",connectStep);
         //联网的逻辑
         if(GSM_ON_FLAG == 1)// && IsReadVoltage == false
         {
+					GSM_ON_FLAG = 0;
+					
 					//恢复与无线模组通讯的任务，并开始与AWS通信
 					//vTaskResume();
-					GSM_ON_FLAG = 0;
-//					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);						
-//					HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET);
 					
 					//发送做饭数据，该部分长按或RTC定时发送，
 					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
-					if(IsNeedSendCook == true)  //PostCookingSecsion
+					if(IsNeedRepaySetup == true)
 					{
-						PostMeterStatus();
-						LL_VCC(1);
-						printf("Long press!\r\n");
 						PostMeterSettings();
-						PostMeterHardware();
-						PostMeterWarning();
+						IsNeedRepaySetup = false;
+						TimeForCurrStart = HAL_GetTick();
+						HearRetryNumber = 0;
+					}
+					else if(IsNeedSendCook == true)  //PostCookingSecsion
+					{
+						printf("Long press!\r\n");
+//						PostMeterStatus();
+						LL_VCC(1);
+//						PostMeterSettings();
+//						PostMeterHardware();
+//						PostMeterWarning();
 						PostCookingSecsion();
 					}
 					else if(IsNeedTimeing ==  true) //PostCookingSecsion
 					{
 						IsNeedTimeing = false;
-						if(IsSendHalfTime == false)
-						{
-							PostCookingSecsion();
-							IsSendHalfTime = true;
-							TimeForCurrStart = HAL_GetTick();		
-						}
-						else
-						{
-							if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
-							{
-								PostMeterStatus(); //PostMeterStatus
-								IsSendHalfTime = false;
-								IsNeedTimeing = false;
-								TimeForCurrStart = HAL_GetTick();
-							}
-						}
+						printf("send IsNeedTimeing!\r\n");
+						PostMeterHardware();
+						PostMeterStatus();
+						TimeForCurrStart = HAL_GetTick();		
+
 						HearRetryNumber = 0;
 					}
 					else if(IsNeedWarning == true)//报警信息 PostMeterWarning
 					{
+						printf("PostMeterWarning!\r\n");
 						if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
 						{
+							printf("send PostMeterWarning!\r\n");
 							PostMeterWarning(); 
 							IsNeedWarning = false;
 							TimeForCurrStart = HAL_GetTick();
@@ -2221,6 +2219,7 @@ void StartDefaultTask(void const * argument)
 						TimeForCurrStart = HAL_GetTick();
 						HearRetryNumber = 0;
 					}
+
 //					if(IsNeedSendCook == true) 
 //					{
 //							if(REAL_DATA_Credit.CookingSessionEnd > REAL_DATA_Credit.CookingSessionSendNumber &&
@@ -2513,7 +2512,7 @@ void StartDefaultTask(void const * argument)
 
         if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
         {
-//            HAL_IWDG_Refresh(&hiwdg);
+            HAL_IWDG_Refresh(&hiwdg);
         }
 
         osDelay(10);
@@ -2529,8 +2528,8 @@ void StartkeyTask(void const * argument)
     /* Infinite loop */
     for(;;)
     {
-        tkeyValue = key_read(&key1_Status);
-			
+			tkeyValue = key_read(&key1_Status);
+
         //屏幕按键有动作
         if(tkeyValue != 0)
         {
@@ -3221,68 +3220,68 @@ void Sim80xBuffTask(void const * argument)
 /* USER CODE BEGIN Application */
 void IntoLowPower()
 {
-//			__HAL_RCC_GPIOA_CLK_ENABLE();
-//			__HAL_RCC_GPIOB_CLK_ENABLE();
-//			__HAL_RCC_GPIOC_CLK_ENABLE();
-//			__HAL_RCC_GPIOD_CLK_ENABLE();
-//			__HAL_RCC_GPIOF_CLK_ENABLE();
-//			//关闭电机的引脚
-//			HAL_GPIO_WritePin(CLOSE_Lock_GPIO_Port,CLOSE_Lock_Pin,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(OPEN_Lock_GPIO_Port,OPEN_Lock_Pin,GPIO_PIN_RESET);
+			__HAL_RCC_GPIOA_CLK_ENABLE();
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+			__HAL_RCC_GPIOC_CLK_ENABLE();
+			__HAL_RCC_GPIOD_CLK_ENABLE();
+			__HAL_RCC_GPIOF_CLK_ENABLE();
+			//关闭电机的引脚
+			HAL_GPIO_WritePin(CLOSE_Lock_GPIO_Port,CLOSE_Lock_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(OPEN_Lock_GPIO_Port,OPEN_Lock_Pin,GPIO_PIN_RESET);
 
-//			HAL_GPIO_WritePin(Moto_Open_GPIO_Port,Moto_Open_Pin,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(Moto_Close_GPIO_Port,Moto_Close_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(Moto_Open_GPIO_Port,Moto_Open_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(Moto_Close_GPIO_Port,Moto_Close_Pin,GPIO_PIN_RESET);
 
-//			HAL_GPIO_WritePin(Moto3_Open_GPIO_Port,Moto3_Open_Pin,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(Moto3_Close_GPIO_Port,Moto3_Close_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(Moto3_Open_GPIO_Port,Moto3_Open_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(Moto3_Close_GPIO_Port,Moto3_Close_Pin,GPIO_PIN_RESET);
 
-//			//关闭屏幕
-//			//需要重新配置的引脚
-//			GPIO_InitTypeDef GPIO_InitStruct;
-//			//屏幕的引脚关闭
-//			GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
-//			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-//			GPIO_InitStruct.Pull = GPIO_NOPULL;
-//			HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-//			CS_W(0);
+			//关闭屏幕
+			//需要重新配置的引脚
+			GPIO_InitTypeDef GPIO_InitStruct;
+			//屏幕的引脚关闭
+			GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
+			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+			CS_W(0);
 
-//			//关闭RFID
-//			HAL_GPIO_WritePin(RC522_Reset_GPIO_Port,RC522_Reset_Pin,GPIO_PIN_RESET);//置低
-//			HAL_GPIO_WritePin(SPI_CS3_GPIO_Port,SPI_CS3_Pin,GPIO_PIN_RESET);//RFID CS
-//			//printf("Into LowPower2\r\n");
-//			
-//			//关闭SPI的时候有待商榷,首先先关闭spi口,如果先断电,实际上是同时带电,先关闭哪一个,哪一个就是可以操作的,在置另一个cs为低的时候,如果有干扰可能会对第一个关闭的有影响
-//			//下面改了一下顺序,有待测试
-//			//关闭spi接口
-//			//关闭SPI的引脚,用于PCB的Flash
-//			//			GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
-//			//			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-//			//			GPIO_InitStruct.Pull = GPIO_NOPULL;
-//			//			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//			
-//			HAL_SPI_MspDeInit(&hspi2);
-//			
-//			//关闭大小Flash
-//			//停止外部内存
-////			LL_VCC(0);
-////			MB_SPI_CS_ENABLE;     //小Flash CS
-////			FLASH_SPI_CS_ENABLE;  //大Flash CS
-//      FLASH_SPI_CS_ENABLE;  //大Flash CS
-//			MB_SPI_CS_ENABLE;     //小Flash CS
+			//关闭RFID
+			HAL_GPIO_WritePin(RC522_Reset_GPIO_Port,RC522_Reset_Pin,GPIO_PIN_RESET);//置低
+			HAL_GPIO_WritePin(SPI_CS3_GPIO_Port,SPI_CS3_Pin,GPIO_PIN_RESET);//RFID CS
+			//printf("Into LowPower2\r\n");
+			
+			//关闭SPI的时候有待商榷,首先先关闭spi口,如果先断电,实际上是同时带电,先关闭哪一个,哪一个就是可以操作的,在置另一个cs为低的时候,如果有干扰可能会对第一个关闭的有影响
+			//下面改了一下顺序,有待测试
+			//关闭spi接口
+			//关闭SPI的引脚,用于PCB的Flash
+			//			GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+			//			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+			//			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			//			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+			
+			HAL_SPI_MspDeInit(&hspi2);
+			
+			//关闭大小Flash
+			//停止外部内存
 //			LL_VCC(0);
-//			
-//			//HAL_UART_MspDeInit(&huart3);
-//			//关闭外部高速晶振的引脚
-//			GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
-//			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-//			GPIO_InitStruct.Pull = GPIO_NOPULL;
-//			HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+//			MB_SPI_CS_ENABLE;     //小Flash CS
+//			FLASH_SPI_CS_ENABLE;  //大Flash CS
+      FLASH_SPI_CS_ENABLE;  //大Flash CS
+			MB_SPI_CS_ENABLE;     //小Flash CS
+			LL_VCC(0);
+			
+			//HAL_UART_MspDeInit(&huart3);
+			//关闭外部高速晶振的引脚
+			GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+			GPIO_InitStruct.Pull = GPIO_NOPULL;
+			HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-//			//停止升压
-//			ENBOOST_PWR(0);
-//			GPRS_PWR(0);
-//			//GPRS模块断电的情况下,输出低,当开机的时候
-//			HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);
+			//停止升压
+			ENBOOST_PWR(0);
+			GPRS_PWR(0);
+			//GPRS模块断电的情况下,输出低,当开机的时候
+			HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);
 }
 /* USER CODE END Application */
 

@@ -10,5 +10,9 @@
 extern REAL_DATA_Credit_t REAL_DATA_Credit;
 extern CookingSessionReport_t CookingSessionReport;
 extern reportStatePacket_t reportStatePacket;
+//extern bool IsNeedRestart;
+extern CONFIG_Meter_t CONFIG_Meter;
+
+//enum { ERROR=0,CORRECT!=false};
 
 #endif

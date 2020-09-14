@@ -1,7 +1,5 @@
-#include "encode.h"
-#include "string.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "includes.h"
+
 
 //时间格式转化
 void DataTimeFormat(char **destination,char *source)
@@ -64,6 +62,10 @@ void encodeCookingPacket(char **sendMeagess,CookingSessionReport_t *rPacket)
 	
 	strcat(*sendMeagess,"\"gasRemaining\":");
 	strcat(*sendMeagess,rPacket->GAS_REMAINING);
+	strcat(*sendMeagess,",");
+	
+	strcat(*sendMeagess,"\"cardId\":");
+	strcat(*sendMeagess,rPacket->CARD_ID);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"csrpTimestamp\":\"");

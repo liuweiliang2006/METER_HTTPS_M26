@@ -89,3 +89,6 @@ if(HAL_GetTick()-TimeForSlowRunGPRSFree > 1500)
 		}
 	}
 }
+
+20200914 0914
+加入看门狗和休眠功能
