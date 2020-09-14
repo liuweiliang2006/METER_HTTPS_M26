@@ -51,6 +51,7 @@ void  PostMeterStatus(void);
 void  PostMeterWarning(void);
 void  PostMeterHardware(void);
 void  PostMeterSettings(void);
+void  GetMeterSettings(void);
 
 uint8_t Analysis_AT_Cmd(char *pdata);
 uint8_t Analysis_CSQ_Cmd(char *pdata);

@@ -7,6 +7,8 @@
 #include "LogUtils.h"
 #include "signal.h"
 
+extern bool IsNeedRestart;
+
 uint8_t GSM_ON_FLAG = 0; //模块上电标志
 extern osMessageQId myQueueGPRSDataHandle;
 extern osThreadId myTaskSim80xBufHandle;
@@ -766,6 +768,10 @@ void  Sim80x_BufferProcess(void)
 		xResult = xSemaphoreTake(Semaphore_Uart_Rec, (TickType_t)portMAX_DELAY);
 		if(xResult == pdTRUE)
 		{
+			if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+			{
+					HAL_IWDG_Refresh(&hiwdg);
+			}
 			xQueueReceive(SendATQueue, (void *)&u8ATNum, (TickType_t)0);
 			if(u8ATNum != 0)
 			{

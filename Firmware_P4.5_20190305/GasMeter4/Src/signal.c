@@ -226,6 +226,7 @@ static void CmdLength(uint16_t urllength,uint8_t cmd_num)
 static void SendGetCommand()
 {
 	uint8_t i = 0;
+	EventBits_t event_value = 0;
 	for(i=0;i< M26GETCOMMANDLEN;i++)
 	{
 		if((u8GetNum[i]!=5))
@@ -233,10 +234,22 @@ static void SendGetCommand()
 			printf("send:%s\r\n\r\n",Send_AT_cmd[u8GetNum[i]].SendCommand);
 			Sim80x.AtCommand.FindAnswer = 0;
 			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	 
-			Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-			osDelay(2000);
+//			Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
+//			osDelay(2000);
 			while(!Sim80x.AtCommand.FindAnswer)
 			{
+				event_value = xEventGroupGetBits(xCreatedEventGroup);
+				if(event_value != 0)
+				{
+					i = M26GETCOMMANDLEN -1; //遇到AT指令的错误，则让使其在下一次循环当中让其断开
+					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
+					event_value = 0;
+				}
+				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+				{
+						HAL_IWDG_Refresh(&hiwdg);
+				}
+				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
 				osDelay(2000);
 			}
@@ -691,7 +704,7 @@ void  PostCookingSecsion(void)  //SendReportDataPacket
 		memset(ptPostData,0,350 *sizeof(char));
 		
 		printf("\r\ncompare %d %d\r\n",REAL_DATA_Credit.CookingSessionSendNumber,REAL_DATA_Credit.CookingSessionEnd);
-		printf("******PostCookingSecsion******");
+		printf("******PostCookingSecsion******\r\n");
 		Cooking_Session_READ(REAL_DATA_Credit.CookingSessionSendNumber);//发送的时候从开始位置开始读取,发送成功,索引加一
 		refreshCookingSessionReport(&CookingSessionReport);		
 		
@@ -725,11 +738,11 @@ void  PostCookingSecsion(void)  //SendReportDataPacket
 		{
 			REAL_DATA_Credit.CookingSessionSendNumber++;
 			REAL_DATA_Credit_Write();//发送完cooking ,保存序号		
-			printf("******end PostCookingSecsion******");
+			printf("******end PostCookingSecsion******\r\n");
 		}
 		else  //发送失败不更新，下一周期重新上传
 		{
-			printf("******PostCookingSecsion fail!\r\n******");
+			printf("******PostCookingSecsion fail!******\r\n");
 			return ;			
 		}
 			
@@ -757,7 +770,7 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	ptPostData = (char *) malloc(350 *sizeof(char));
 	memset(ptPostData,0,350 *sizeof(char));
 	
-	printf("******PostMeterStatus******");
+	printf("******PostMeterStatus******\r\n");
 	
 	refreshReportStatePacket(&reportStatePacket);		
 	encodeMeterStatusPacket(&ptPostData,&reportStatePacket); //组包 cookingsecsion POST的数据内容
@@ -786,7 +799,7 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	free(Send_AT_cmd[14].SendCommand);		
 	free(ptPostData);	
 	
-	printf("******end PostMeterStatus******");
+	printf("******end PostMeterStatus******\r\n");
 
 }
 
@@ -809,7 +822,7 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	ptPostData = (char *) malloc(500 *sizeof(char));
 	memset(ptPostData,0,500 *sizeof(char));
 	
-	printf("******PostMeterWarning******");
+	printf("******PostMeterWarning******\r\n");
 	refreshWaringPacket(&waringPacket);
 	encodeWarningsPacket(&ptPostData,&waringPacket); //组包 cookingsecsion POST的数据内容
 	
@@ -837,7 +850,7 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	free(Send_AT_cmd[14].SendCommand);		
 	free(ptPostData);	
 	
-	printf("******end PostMeterWarning******");
+	printf("******end PostMeterWarning******\r\n");
 }
 
 //PostMeterHardware 发送函数
@@ -859,7 +872,7 @@ void  PostMeterHardware(void)  //SendWarnPacket();
 	ptPostData = (char *) malloc(500 *sizeof(char));
 	memset(ptPostData,0,400 *sizeof(char));
 	
-	printf("******PostMeterHardware******");
+	printf("******PostMeterHardware******\r\n");
 	refreshInformationPacket(&InformationPacket);
 	encodeHardwarePacket(&ptPostData,&InformationPacket); 
 	
@@ -887,7 +900,7 @@ void  PostMeterHardware(void)  //SendWarnPacket();
 	free(Send_AT_cmd[14].SendCommand);		
 	free(ptPostData);	
 	
-	printf("******end PostMeterHardware******");
+	printf("******end PostMeterHardware******\r\n");
 }
 
 //PostMeterSettings 发送函数
@@ -910,7 +923,7 @@ void  PostMeterSettings(void)  //
 	ptPostData = (char *) malloc(500 *sizeof(char));
 	memset(ptPostData,0,500 *sizeof(char));
 	
-	printf("******PostMeterSettings******");
+	printf("******PostMeterSettings******\r\n");
 	refreshSetupPacket(&SetupPacket);
 	encodeSettingsPacket(&ptPostData,&SetupPacket); 
 	
@@ -938,6 +951,51 @@ void  PostMeterSettings(void)  //
 	free(Send_AT_cmd[14].SendCommand);		
 	free(ptPostData);	
 	
-	printf("******end PostMeterSettings******");
+	printf("******end PostMeterSettings******\r\n");
 }
+
+
+//PostMeterSettings 发送函数
+void  GetMeterSettings(void)  //
+{
+	Stru_Sever_Info_t *struSeverInfo;
+	uint8_t result = 0 , i = 0; //用于标识，是否响应了当前的指令
+	char *ptUrl;
+	char *cDataTime ;
+	volatile uint16_t u8UrlLength = 0;	
+	
+	M26_Sni_Init();
+	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
+	memset(Send_AT_cmd[14].SendCommand,0,20 *sizeof(char));
+	
+	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
+//	ptPostData = (char *) malloc(500 *sizeof(char));
+//	memset(ptPostData,0,500 *sizeof(char));
+	
+	printf("******GetMeterSettings******\r\n");
+	
+	struSeverInfo->Sendsever = SEVER_URL;
+	u8UrlLength = strlen(struSeverInfo->Sendsever);
+	struSeverInfo->SeverVer = SEVER_VERSION;
+	struSeverInfo->CardID = "";
+	struSeverInfo->MeterId = "meter/settings/TZ00000525";
+	ptUrl = Sever_Address_GET( struSeverInfo,"");
+	
+	Send_AT_cmd[9].SendCommand = ptUrl; //URL地址
+	u8UrlLength = strlen(ptUrl)-2;
+	CmdLength(u8UrlLength,9);  //根据发送URL的长度		获取URL的长度添充AT+QHTTPURL=XX,60
+		
+	SendGetCommand();
+	
+	free(ptUrl);
+//	free(ptPost);
+	free(Send_AT_cmd[8].SendCommand);
+	free(Send_AT_cmd[14].SendCommand);		
+//	free(ptPostData);	
+	
+	printf("******end GetMeterSettings******\r\n");
+}
+
 

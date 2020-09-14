@@ -2171,22 +2171,16 @@ void StartDefaultTask(void const * argument)
 					
 					//发送做饭数据，该部分长按或RTC定时发送，
 					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
-					if(IsNeedRepaySetup == true)
-					{
-						PostMeterSettings();
-						IsNeedRepaySetup = false;
-						TimeForCurrStart = HAL_GetTick();
-						HearRetryNumber = 0;
-					}
-					else if(IsNeedSendCook == true)  //PostCookingSecsion
+					if(IsNeedSendCook == true)  //PostCookingSecsion
 					{
 						printf("Long press!\r\n");
+						GetMeterSettings();
 //						PostMeterStatus();
 						LL_VCC(1);
 //						PostMeterSettings();
 //						PostMeterHardware();
 //						PostMeterWarning();
-						PostCookingSecsion();
+//						PostCookingSecsion();
 					}
 					else if(IsNeedTimeing ==  true) //PostCookingSecsion
 					{
