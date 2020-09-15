@@ -310,14 +310,14 @@ void  Sim80x_SetPower(bool TurnOn)
 					//if(Sim80x_SendAtCommand("AT\r\n",200,1,"AT\r\r\nOK\r\n") == 1)
 					{
 						//#if (_SIM80X_USE_POWER_KEY==0)
-								if(Sim80x.Modem_Type == Quectel_M26)
-								{
+//								if(Sim80x.Modem_Type == Quectel_M26)
+//								{
 	 								Sim80x_SendAtCommand("AT+QPOWD=1\r\n",2000,1,"\r\nOK\r\n");
-								}
-								else
-								{
-									Sim80x_SendAtCommand("AT+CPOWD=1\r\n",2000,1,"\r\nOK\r\n");
-								}
+//								}
+//								else
+//								{
+//									Sim80x_SendAtCommand("AT+CPOWD=1\r\n",2000,1,"\r\nOK\r\n");
+//								}
 						//#endif
 					}
 				}

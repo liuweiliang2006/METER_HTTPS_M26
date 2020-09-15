@@ -17,6 +17,7 @@
 #include "ReportStatePacket.h"
 #include "encode.h"
 #include "iwdg.h"
+#include "gas.h"
 
 #include "cJSON.h"
 #endif

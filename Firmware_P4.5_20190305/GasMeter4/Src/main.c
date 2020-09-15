@@ -60,6 +60,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "includes.h"
 #include "signal.h"
 #include "bsp.h"
 #include "Sim80X.h"
@@ -219,7 +220,7 @@ int main(void)
 	
   MX_FREERTOS_Init();
 	AppObjCreate();
-
+	GetCmdEventGroupCreat();
   /* Start scheduler */
   osKernelStart();
   

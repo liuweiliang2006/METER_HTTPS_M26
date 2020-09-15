@@ -73,6 +73,7 @@
 
 #include "event_groups.h"
 #include "signal.h"
+#include "includes.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -743,6 +744,8 @@ void StartDefaultTask(void const * argument)
 	  tim_t StartWarn; //开始报警的时间
 
     long date,time;//UTC
+		
+		EventBits_t u32GetCmdValue = 0;
 
     //rfid需要的变量
     uchar getdata[16];
@@ -2179,29 +2182,34 @@ void StartDefaultTask(void const * argument)
 //						__HAL_RCC_WWDG_CLK_DISABLE();
 						IsNeedSendCook = 0;
 						printf("Long press!\r\n");
-						HAL_IWDG_Refresh(&hiwdg);
-						GetMeterSettings();
-						HAL_IWDG_Refresh(&hiwdg);
-						printf("GetMeterSettings!\r\n");
-//						 __HAL_RCC_WWDG_CLK_ENABLE();
-//						PostMeterStatus();
-						LL_VCC(1);
-//						PostMeterSettings();
-//						PostMeterHardware();
-//						PostMeterWarning();
+//						HAL_IWDG_Refresh(&hiwdg);
 //						PostCookingSecsion();
+						GetMeterSettings();
+						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
+						if(u32GetCmdValue & GET_CMD_STUP)
+						{
+							xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
+							PostMeterSettings();
+							PostMeterHardware();
+							PostMeterStatus();
+						}
+//						HAL_IWDG_Refresh(&hiwdg);
+						printf("GetMeterSettings!\r\n");
+						LL_VCC(1);
 					}
 					else if(IsNeedTimeing ==  true) //PostCookingSecsion
 					{
 						IsNeedTimeing = false;
 						printf("send IsNeedTimeing!\r\n");
-//						__HAL_RCC_WWDG_CLK_DISABLE();
-						HAL_IWDG_Refresh(&hiwdg);
-						PostMeterHardware();
-						HAL_IWDG_Refresh(&hiwdg);
-						PostMeterStatus();
-						HAL_IWDG_Refresh(&hiwdg);
-//						 __HAL_RCC_WWDG_CLK_ENABLE();
+						GetMeterSettings();
+						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
+						if(u32GetCmdValue & GET_CMD_STUP)
+						{
+							xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
+							PostMeterSettings();
+							PostMeterHardware();
+							PostMeterStatus();
+						}
 						printf("GetMeterSettings!\r\n");
 						TimeForCurrStart = HAL_GetTick();		
 
@@ -2212,14 +2220,15 @@ void StartDefaultTask(void const * argument)
 						printf("PostMeterWarning!\r\n");
 						printf("send PostMeterWarning!\r\n");
 //						__HAL_RCC_WWDG_CLK_DISABLE();
-						HAL_IWDG_Refresh(&hiwdg);
+//						HAL_IWDG_Refresh(&hiwdg);
 						PostMeterWarning(); 
-						HAL_IWDG_Refresh(&hiwdg);
+//						HAL_IWDG_Refresh(&hiwdg);
 						printf("GetMeterSettings!\r\n");
 //						__HAL_RCC_WWDG_CLK_ENABLE();
 						IsNeedWarning = false;
 						HearRetryNumber = 0;
 					}
+					Sim80x_GPRSClose(0);
 		
 //					if(IsNeedSendCook == true) 
 //					{
@@ -2264,6 +2273,19 @@ void StartDefaultTask(void const * argument)
 				
         //printf("StartRunTime %d\r\n",StartRunTime);
         //进入低功耗
+	#ifdef LWL_DEBUG
+				printf("Current_card_type %d\r\n",Current_card_type);
+				printf("ElectricValveStatus %d\r\n",strcmp(REAL_DATA_PARAM.ElectricValveStatus, "0"));
+				printf("IsTestEnd %d\r\n",IsTestEnd);
+				printf("IsStartCooking5 %d\r\n",IsStartCooking5);
+				printf("Lcd_Status %d\r\n",Lcd_Status);
+				printf("sStep %d\r\n",sStep);
+				printf("IsTestPower %d\r\n",IsTestPower);
+				printf("gmotorStatus %d\r\n",gmotorStatus);
+				printf("gassembleStatus %d\r\n",gassembleStatus);
+				printf("connectStep %d\r\n",connectStep);
+				printf("GSM_ON_FLAG %d\r\n",GSM_ON_FLAG);
+	#endif
         if(((Current_card_type == 0 //没有卡片
              && strcmp(REAL_DATA_PARAM.ElectricValveStatus, "0")==0)// && IsReadVoltage == false
              ||(Current_card_type == 1 //有卡片
