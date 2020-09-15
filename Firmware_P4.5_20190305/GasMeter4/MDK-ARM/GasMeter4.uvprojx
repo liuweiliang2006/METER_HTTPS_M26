@@ -652,6 +652,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\encode.c</FilePath>
             </File>
+            <File>
+              <FileName>GetAnalyse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GetAnalyse.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -831,6 +836,16 @@
               <FileName>cmsis_os.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cjson</GroupName>
+          <Files>
+            <File>
+              <FileName>cJSON.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\cjson\cJSON.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1171,7 +1186,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F030xC,APP1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;       ../Drivers/STM32F0xx_HAL_Driver/Inc;       ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;       ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0;       ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;       ../Middlewares/Third_Party/FreeRTOS/Source/include;       ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;       ../Drivers/CMSIS/Include;       ../Drivers/BSP/Inc;       ../Middlewares/Third_Party/GsmLib</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F0xx_HAL_Driver/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0;../Drivers/CMSIS/Device/ST/STM32F0xx/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Drivers/CMSIS/Include;../Drivers/BSP/Inc;../Middlewares/Third_Party/GsmLib;..\cjson</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1485,6 +1500,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\encode.c</FilePath>
             </File>
+            <File>
+              <FileName>GetAnalyse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GetAnalyse.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1664,6 +1684,16 @@
               <FileName>cmsis_os.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cjson</GroupName>
+          <Files>
+            <File>
+              <FileName>cJSON.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\cjson\cJSON.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2317,6 +2347,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\encode.c</FilePath>
             </File>
+            <File>
+              <FileName>GetAnalyse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GetAnalyse.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2496,6 +2531,16 @@
               <FileName>cmsis_os.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cjson</GroupName>
+          <Files>
+            <File>
+              <FileName>cJSON.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\cjson\cJSON.c</FilePath>
             </File>
           </Files>
         </Group>

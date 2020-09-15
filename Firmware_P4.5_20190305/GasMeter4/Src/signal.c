@@ -245,10 +245,10 @@ static void SendGetCommand()
 					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 					event_value = 0;
 				}
-				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
-				{
+//				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+//				{
 						HAL_IWDG_Refresh(&hiwdg);
-				}
+//				}
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
 				osDelay(2000);
@@ -284,10 +284,10 @@ static ErrorStatus SendPostCommand()
 					event_value = 0;
 					u8ErrorFlag = 1;
 				}
-				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
-				{
+//				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+//				{
 						HAL_IWDG_Refresh(&hiwdg);
-				}
+//				}
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"OK\r\n");
 				osDelay(2000);			
@@ -317,10 +317,10 @@ static void M26_Sni_Init(void )
 //			osDelay(2000);
 			while(!Sim80x.AtCommand.FindAnswer)
 			{
-				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
-					{
-							HAL_IWDG_Refresh(&hiwdg);
-					}
+//				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+//				{
+						HAL_IWDG_Refresh(&hiwdg);
+//				}
 				{
 					Sim80x_SendAtCommand(Send_AT_cmd[u8SniNum[i]].SendCommand,1000,1,"OK\r\n");
 					osDelay(2000);
@@ -728,6 +728,7 @@ void  PostCookingSecsion(void)  //SendReportDataPacket
 		
 		ErrorFlag =SendPostCommand();
 		
+		free(struSeverInfo);
 		free(ptUrl);
 		free(ptPost);
 		free(Send_AT_cmd[8].SendCommand);
@@ -793,6 +794,7 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	
 	SendPostCommand();
 	
+	free(struSeverInfo);
 	free(ptUrl);
 	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);
@@ -844,6 +846,7 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	
 	SendPostCommand();
 	
+	free(struSeverInfo);
 	free(ptUrl);
 	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);
@@ -894,6 +897,7 @@ void  PostMeterHardware(void)  //SendWarnPacket();
 	
 	SendPostCommand();
 	
+	free(struSeverInfo);	
 	free(ptUrl);
 	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);
@@ -945,6 +949,7 @@ void  PostMeterSettings(void)  //
 	
 	SendPostCommand();
 	
+	free(struSeverInfo);
 	free(ptUrl);
 	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);
@@ -955,7 +960,7 @@ void  PostMeterSettings(void)  //
 }
 
 
-//PostMeterSettings 发送函数
+//GetMeterSettings 发送函数
 void  GetMeterSettings(void)  //
 {
 	Stru_Sever_Info_t *struSeverInfo;
@@ -989,6 +994,7 @@ void  GetMeterSettings(void)  //
 		
 	SendGetCommand();
 	
+	free(struSeverInfo);
 	free(ptUrl);
 //	free(ptPost);
 	free(Send_AT_cmd[8].SendCommand);

@@ -82,6 +82,9 @@ osThreadId myLedTaskHandle;
 osThreadId myTaskCmdAnalyzHandle;
 osThreadId myTaskSim80xBufHandle;
 
+//#define LWL_DEBUG 1
+
+
 /* USER CODE BEGIN Variables */
 #define Version    0x41
 
@@ -2173,8 +2176,14 @@ void StartDefaultTask(void const * argument)
 					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
 					if(IsNeedSendCook == true)  //PostCookingSecsion
 					{
+//						__HAL_RCC_WWDG_CLK_DISABLE();
+						IsNeedSendCook = 0;
 						printf("Long press!\r\n");
+						HAL_IWDG_Refresh(&hiwdg);
 						GetMeterSettings();
+						HAL_IWDG_Refresh(&hiwdg);
+						printf("GetMeterSettings!\r\n");
+//						 __HAL_RCC_WWDG_CLK_ENABLE();
 //						PostMeterStatus();
 						LL_VCC(1);
 //						PostMeterSettings();
@@ -2186,8 +2195,14 @@ void StartDefaultTask(void const * argument)
 					{
 						IsNeedTimeing = false;
 						printf("send IsNeedTimeing!\r\n");
+//						__HAL_RCC_WWDG_CLK_DISABLE();
+						HAL_IWDG_Refresh(&hiwdg);
 						PostMeterHardware();
+						HAL_IWDG_Refresh(&hiwdg);
 						PostMeterStatus();
+						HAL_IWDG_Refresh(&hiwdg);
+//						 __HAL_RCC_WWDG_CLK_ENABLE();
+						printf("GetMeterSettings!\r\n");
 						TimeForCurrStart = HAL_GetTick();		
 
 						HearRetryNumber = 0;
@@ -2195,25 +2210,17 @@ void StartDefaultTask(void const * argument)
 					else if(IsNeedWarning == true)//报警信息 PostMeterWarning
 					{
 						printf("PostMeterWarning!\r\n");
-						if(HAL_GetTick()-TimeForCurrStart > 1000 * 5)
-						{
-							printf("send PostMeterWarning!\r\n");
-							PostMeterWarning(); 
-							IsNeedWarning = false;
-							TimeForCurrStart = HAL_GetTick();
-						}
+						printf("send PostMeterWarning!\r\n");
+//						__HAL_RCC_WWDG_CLK_DISABLE();
+						HAL_IWDG_Refresh(&hiwdg);
+						PostMeterWarning(); 
+						HAL_IWDG_Refresh(&hiwdg);
+						printf("GetMeterSettings!\r\n");
+//						__HAL_RCC_WWDG_CLK_ENABLE();
+						IsNeedWarning = false;
 						HearRetryNumber = 0;
 					}
-					else if(IsNeedInformationResponse == true) //PostMeterHardware
-					{
-						IsNeedInformationResponse = false;
-//						SendInformationPacket();
-						PostMeterHardware();
-						commandType = 0;
-						TimeForCurrStart = HAL_GetTick();
-						HearRetryNumber = 0;
-					}
-
+		
 //					if(IsNeedSendCook == true) 
 //					{
 //							if(REAL_DATA_Credit.CookingSessionEnd > REAL_DATA_Credit.CookingSessionSendNumber &&
@@ -2246,7 +2253,9 @@ void StartDefaultTask(void const * argument)
 //							IsSaveREAL_DATA_Credit = true;
 //						}										
         }
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
 //				printf("Lcd_Status %d\r\n",Lcd_Status);
 //				printf("sStep %d\r\n",sStep);
 //				printf("IsTestPower %d\r\n",IsTestPower);
@@ -2273,6 +2282,9 @@ void StartDefaultTask(void const * argument)
                 && GSM_ON_FLAG == 0   //没有尝试联网
 				)   
         {
+					#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+					#endif
             IsIntoLowPower = true;
             if(IsStartCooking5 == false && Get_SubSeconds(StartCookingSeconds) >= 120)
             {
@@ -2312,8 +2324,13 @@ void StartDefaultTask(void const * argument)
             HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
             HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
             //printf("Into LowPower %02d:%02d:%02d\r\n",sTime.Hours,sTime.Minutes,sTime.Seconds);
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
             HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+		#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif					
 						//printf("aaaaaaa\r\n");
             //			printf("gkeyValue : %d\r\n\r\n",gkeyValue);
 
@@ -2330,16 +2347,23 @@ void StartDefaultTask(void const * argument)
             		2、退出低功耗的停机模式后，需要重新配置使用HSE。
             */
             /* Set the new HSE configuration ---------------------------------------*/
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif								
             if(MYSYSCLK == 8)
 						{
+					
 								//开启外部高速时钟
 								__HAL_RCC_HSE_CONFIG(RCC_HSE_ON);
+					
 								while (__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) == RESET)
 								{
 										//是否开启完成
 								}
 								//选择系统时钟为HSE
+						
 								__HAL_RCC_SYSCLK_CONFIG(RCC_SYSCLKSOURCE_HSE);
+						
 								//printf("__HAL_RCC_GET_SYSCLK_SOURCE()2 %d\r\n",__HAL_RCC_GET_SYSCLK_SOURCE());
 								//判断是否启用成功
 								while (__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_SYSCLKSOURCE_STATUS_HSE)
@@ -2390,12 +2414,18 @@ void StartDefaultTask(void const * argument)
 								}
 								//printf("__HAL_RCC_GET_SYSCLK_SOURCE()4 %d\r\n",__HAL_RCC_GET_SYSCLK_SOURCE());
 								//			SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk; /* 使能滴答定时器 */
-						}	
+						}
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif								
             __HAL_RCC_GPIOA_CLK_ENABLE();
             __HAL_RCC_GPIOB_CLK_ENABLE();
             __HAL_RCC_GPIOC_CLK_ENABLE();
             __HAL_RCC_GPIOD_CLK_ENABLE();
             __HAL_RCC_GPIOF_CLK_ENABLE();
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif							
             //关闭电机的引脚
             //		  HAL_GPIO_WritePin(MOTOR1_H_PORT,MOTOR1_H_PIN,GPIO_PIN_RESET);
             //		  HAL_GPIO_WritePin(MOTOR1_L_PORT,MOTOR1_L_PIN,GPIO_PIN_RESET);
@@ -2412,7 +2442,9 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(SPI_CS3_GPIO_Port,SPI_CS3_Pin,GPIO_PIN_SET);//RFID CS 置高成不能用
             MB_SPI_CS_DISABLE;     //小Flash CS 不使能
             FLASH_SPI_CS_DISABLE;  //大Flash CS 不使能
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif		
             HAL_SPI_MspInit(&hspi2);
             //HAL_UART_MspInit(&huart3);
             //MX_USART3_UART_Init();
@@ -2476,7 +2508,9 @@ void StartDefaultTask(void const * argument)
             //HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
             //printf("Out LowPower %02d:%02d:%02d\r\n",sTime.Hours,sTime.Minutes,sTime.Seconds);
         }
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif		
         //从单独一个线程移动到这里,并且在进入低功耗是判断是否有阀门有动作没有完成
         //一个一个的执行
         if(glockStatus != motor_null)
@@ -2503,12 +2537,16 @@ void StartDefaultTask(void const * argument)
                 }
             }
         }
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif		
         if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
         {
             HAL_IWDG_Refresh(&hiwdg);
         }
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif		
         osDelay(10);
     }
   /* USER CODE END StartDefaultTask */
@@ -3219,6 +3257,9 @@ void IntoLowPower()
 			__HAL_RCC_GPIOC_CLK_ENABLE();
 			__HAL_RCC_GPIOD_CLK_ENABLE();
 			__HAL_RCC_GPIOF_CLK_ENABLE();
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
 			//关闭电机的引脚
 			HAL_GPIO_WritePin(CLOSE_Lock_GPIO_Port,CLOSE_Lock_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(OPEN_Lock_GPIO_Port,OPEN_Lock_Pin,GPIO_PIN_RESET);
@@ -3228,7 +3269,9 @@ void IntoLowPower()
 
 			HAL_GPIO_WritePin(Moto3_Open_GPIO_Port,Moto3_Open_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(Moto3_Close_GPIO_Port,Moto3_Close_Pin,GPIO_PIN_RESET);
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
 			//关闭屏幕
 			//需要重新配置的引脚
 			GPIO_InitTypeDef GPIO_InitStruct;
@@ -3238,7 +3281,9 @@ void IntoLowPower()
 			GPIO_InitStruct.Pull = GPIO_NOPULL;
 			HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 			CS_W(0);
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
 			//关闭RFID
 			HAL_GPIO_WritePin(RC522_Reset_GPIO_Port,RC522_Reset_Pin,GPIO_PIN_RESET);//置低
 			HAL_GPIO_WritePin(SPI_CS3_GPIO_Port,SPI_CS3_Pin,GPIO_PIN_RESET);//RFID CS
@@ -3254,7 +3299,9 @@ void IntoLowPower()
 			//			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 			
 			HAL_SPI_MspDeInit(&hspi2);
-			
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif			
 			//关闭大小Flash
 			//停止外部内存
 //			LL_VCC(0);
@@ -3270,7 +3317,9 @@ void IntoLowPower()
 			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 			GPIO_InitStruct.Pull = GPIO_NOPULL;
 			HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-
+	#ifdef LWL_DEBUG
+					printf("line %d\r\n",__LINE__);
+	#endif
 			//停止升压
 			ENBOOST_PWR(0);
 			GPRS_PWR(0);

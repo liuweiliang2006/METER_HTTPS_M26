@@ -92,3 +92,7 @@ if(HAL_GetTick()-TimeForSlowRunGPRSFree > 1500)
 
 20200914 0914
 加入看门狗和休眠功能
+
+20200915 1013
+加入cJSON.c cJSON.h文件，并测试成功
+问题：跑机老化时，会自动重启。

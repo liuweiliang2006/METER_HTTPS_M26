@@ -7,6 +7,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+
+#include "GetAnalyse.h"
 #include "signal.h"
 #include "Sim80x.h"
 #include <stdio.h>
@@ -16,4 +18,5 @@
 #include "encode.h"
 #include "iwdg.h"
 
+#include "cJSON.h"
 #endif

@@ -776,6 +776,7 @@ void  Sim80x_BufferProcess(void)
 			if(u8ATNum != 0)
 			{
 				printf("AT_NO.=%d,rec:%s\r\n",u8ATNum,&Sim80x.UsartRxBuffer[0]);
+				GetAnalyse(&Sim80x.UsartRxBuffer[0]);
 				u8AnalysisResult=Send_AT_cmd[u8ATNum-1].pFun(NULL);
 				if(u8AnalysisResult != 0)
 					Sim80x.AtCommand.FindAnswer = 1;
