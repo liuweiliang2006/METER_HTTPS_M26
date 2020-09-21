@@ -65,7 +65,8 @@ void encodeCookingPacket(char **sendMeagess,CookingSessionReport_t *rPacket)
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"cardId\":");
-	strcat(*sendMeagess,rPacket->CARD_ID);
+//	strcat(*sendMeagess,rPacket->CARD_ID);
+	strcat(*sendMeagess,"3943534095");
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"csrpTimestamp\":\"");

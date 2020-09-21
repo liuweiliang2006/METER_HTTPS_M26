@@ -775,7 +775,16 @@ void  Sim80x_BufferProcess(void)
 			xQueueReceive(SendATQueue, (void *)&u8ATNum, (TickType_t)0);
 			if(u8ATNum != 0)
 			{
+				strStart = (char*)Sim80x.UsartRxBuffer;
 				printf("AT_NO.=%d,rec:%s\r\n",u8ATNum,&Sim80x.UsartRxBuffer[0]);
+				if((u8ATNum != 13) && (strstr(strStart,"DEACT"))) //特殊错误处理，部分指令失败M26自动返回
+				{
+					xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT);
+					printf("rec:xCreatedEventGroup %d \r\n",xEventGroupGetBits(xCreatedEventGroup));
+//					Sim80x.AtCommand.FindAnswer = 1;
+					break;
+				}
+//				printf("rec:%s\r\n",&Sim80x.UsartRxBuffer[0]);
 				GetAnalyse(&Sim80x.UsartRxBuffer[0]);
 				u8AnalysisResult=Send_AT_cmd[u8ATNum-1].pFun(NULL);
 				if(u8AnalysisResult != 0)

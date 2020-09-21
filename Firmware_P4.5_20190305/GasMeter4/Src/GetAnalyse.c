@@ -49,6 +49,7 @@ void GetAnalyse(uint8_t *ptRecData)
 				item = cJSON_GetObjectItem(test_arr,"dataUploadPeriod"); 					//上传周期
 				JsonValue = item->valueint;
 				CONFIG_Meter.UpDuty = (uint32_t) JsonValue;
+				CONFIG_Meter.UpDuty = 20;
 				
 				item = cJSON_GetObjectItem(test_arr,"warningLowBatteryVoltage");	//报警电压阈值
 				memcpy(Value,item->valuestring,strlen(item->valuestring));

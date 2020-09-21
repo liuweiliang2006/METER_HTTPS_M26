@@ -154,6 +154,10 @@ void AppVectorTblRemap(void)
   */
 int main(void)
 {
+	uint32_t rcc_csr = 0;
+	 
+//RCC->CSR |= 1<<24;
+	rcc_csr = RCC->CSR;
   /* USER CODE BEGIN 1 */
 	HAL_RCC_DeInit();
 	my_NVIC_DeInit();
@@ -204,7 +208,7 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim7);
 //	HAL_TIM_Base_Start_IT(&htim14);
-	
+	printf("reset reson %d \r\n" , rcc_csr);
 	//TestMB85RS16A();
 	//TestW25Q64();
 	//在这里开启存储器的电源,读取参数,应该在系统启动的情况下再执行读取等操作,这样有可能通过GPRS发送报警信息

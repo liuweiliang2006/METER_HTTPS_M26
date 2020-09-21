@@ -705,7 +705,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 600);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of myKeyTask */
@@ -742,9 +742,8 @@ void StartDefaultTask(void const * argument)
 
     tim_t run_rtc;
 	  tim_t StartWarn; //开始报警的时间
-
     long date,time;//UTC
-		
+		uint16_t test_i;
 		EventBits_t u32GetCmdValue = 0;
 
     //rfid需要的变量
@@ -2181,9 +2180,11 @@ void StartDefaultTask(void const * argument)
 					{
 //						__HAL_RCC_WWDG_CLK_DISABLE();
 						IsNeedSendCook = 0;
+						
 						printf("Long press!\r\n");
+						M26_Sni_Init();
 //						HAL_IWDG_Refresh(&hiwdg);
-//						PostCookingSecsion();
+						PostCookingSecsion();
 						GetMeterSettings();
 						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
 						if(u32GetCmdValue & GET_CMD_STUP)
@@ -2201,6 +2202,7 @@ void StartDefaultTask(void const * argument)
 					{
 						IsNeedTimeing = false;
 						printf("send IsNeedTimeing!\r\n");
+						M26_Sni_Init();
 						GetMeterSettings();
 						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
 						if(u32GetCmdValue & GET_CMD_STUP)
@@ -2210,20 +2212,17 @@ void StartDefaultTask(void const * argument)
 							PostMeterHardware();
 							PostMeterStatus();
 						}
-						printf("GetMeterSettings!\r\n");
+						printf("end IsNeedTimeing!\r\n");
 						TimeForCurrStart = HAL_GetTick();		
 
 						HearRetryNumber = 0;
 					}
 					else if(IsNeedWarning == true)//报警信息 PostMeterWarning
 					{
-						printf("PostMeterWarning!\r\n");
 						printf("send PostMeterWarning!\r\n");
-//						__HAL_RCC_WWDG_CLK_DISABLE();
-//						HAL_IWDG_Refresh(&hiwdg);
+						M26_Sni_Init();
 						PostMeterWarning(); 
-//						HAL_IWDG_Refresh(&hiwdg);
-						printf("GetMeterSettings!\r\n");
+						printf("end PostMeterWarning!\r\n");
 //						__HAL_RCC_WWDG_CLK_ENABLE();
 						IsNeedWarning = false;
 						HearRetryNumber = 0;
@@ -2326,7 +2325,7 @@ void StartDefaultTask(void const * argument)
 
             /* Enable Power Clock*/
             //			__HAL_RCC_PWR_CLK_ENABLE();
-
+						printf("IntoLowPower\r\n");
             IntoLowPower();
 
             //			RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -3347,6 +3346,15 @@ void IntoLowPower()
 			GPRS_PWR(0);
 			//GPRS模块断电的情况下,输出低,当开机的时候
 			HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);
+			
+			
+}
+
+
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName )
+{
+	printf("任务：%s 发现栈溢出\r\n", pcTaskName);
 }
 /* USER CODE END Application */
 

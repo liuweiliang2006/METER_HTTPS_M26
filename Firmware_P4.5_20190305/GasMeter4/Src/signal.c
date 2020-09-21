@@ -10,7 +10,7 @@ EventGroupHandle_t xCreatedEventGroup = NULL;
 
 #define M26GETCOMMANDLEN 13
 #define M26POSTCOMMANDLEN 15
-
+#define ANALYSIS_PRINT 1
 
 
 stru_P4_command_t Send_AT_cmd[]={
@@ -227,20 +227,23 @@ static void SendGetCommand()
 {
 	uint8_t i = 0;
 	EventBits_t event_value = 0;
+	uint8_t u8QIDEACTSendcnt = 0; //用于记录AT+QIDEACT的次数
+	xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 	for(i=0;i< M26GETCOMMANDLEN;i++)
 	{
 		if((u8GetNum[i]!=5))
 		{
-			printf("send:%s\r\n\r\n",Send_AT_cmd[u8GetNum[i]].SendCommand);
+			
 			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	 
-//			Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-//			osDelay(2000);
+			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	
+			printf("send:%d %s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].u8CmdNum,Send_AT_cmd[u8PostNum[i]].SendCommand); 
 			while(!Sim80x.AtCommand.FindAnswer)
 			{
+				
 				event_value = xEventGroupGetBits(xCreatedEventGroup);
 				if(event_value != 0)
 				{
+					printf("GET event_value %d\r\n",event_value);
 					i = M26GETCOMMANDLEN -1; //遇到AT指令的错误，则让使其在下一次循环当中让其断开
 					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 					event_value = 0;
@@ -250,8 +253,17 @@ static void SendGetCommand()
 						HAL_IWDG_Refresh(&hiwdg);
 //				}
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
+				xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
-				osDelay(2000);
+				osDelay(1000);
+				if( i == M26GETCOMMANDLEN -1)
+				{
+					u8QIDEACTSendcnt++;
+					if(u8QIDEACTSendcnt == 5)
+					{
+						break;
+					}
+				}
 			}
 		}		
 	}
@@ -264,21 +276,23 @@ static ErrorStatus SendPostCommand()
 	uint8_t u8Lenth = 0;
 	EventBits_t event_value = 0;
 	uint8_t u8ErrorFlag = 0;
+	uint8_t u8QIDEACTSendcnt = 0; //用于记录AT+QIDEACT的次数
+	xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 //	for(i=0;i< sizeof(Send_AT_cmd)/sizeof(Send_AT_cmd[0]);i++)M26GETCOMMANDLEN
 	for(i=0;i< M26POSTCOMMANDLEN;i++)
 	{
 		if((u8PostNum[i]!=5))
 		{
-			printf("send:%s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].SendCommand);
+			
 			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);	 
-//			Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-//			osDelay(2000);
+	 
+			printf("send:%d %s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].u8CmdNum,Send_AT_cmd[u8PostNum[i]].SendCommand);
 			while(!Sim80x.AtCommand.FindAnswer)
-			{
+			{				 
 				event_value = xEventGroupGetBits(xCreatedEventGroup);
 				if(event_value != 0)
 				{
+					printf("send event_value %d \r\n",event_value);
 					i = M26POSTCOMMANDLEN -1; //遇到AT指令的错误，则让使其在下一次循环当中让其断开
 					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 					event_value = 0;
@@ -289,14 +303,24 @@ static ErrorStatus SendPostCommand()
 						HAL_IWDG_Refresh(&hiwdg);
 //				}
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
+				xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"OK\r\n");
-				osDelay(2000);			
+				osDelay(1000);	
+				if( i == M26POSTCOMMANDLEN -1)
+				{
+					u8QIDEACTSendcnt++;
+					if(u8QIDEACTSendcnt == 5)
+					{
+						break;
+					}
+				}
 			}
 		}
 //		osDelay(5000);
 	}
 	if (u8ErrorFlag) 
 	{
+		u8ErrorFlag = 0;
 		return ERROR;
 	}
 	return SUCCESS;
@@ -304,7 +328,7 @@ static ErrorStatus SendPostCommand()
 
 
 //M26 SNI功能测试，在GET和POST前要打开SNI功能 对于模块来说只进行一次初始化即可。
-static void M26_Sni_Init(void )
+void M26_Sni_Init(void )
 {
 	uint8_t i = 0;
 	for(i = 0;i < 3;i++)
@@ -342,6 +366,9 @@ uint8_t Analysis_AT_Cmd(char *pdata)
 	ptFindResult = strstr(ptStrStart,"OK");
 	if(ptFindResult != NULL)
 	{
+		#ifdef ANALYSIS_PRINT
+		printf("AT OK find!\r\n");
+		#endif
 		u8ErrorCnt =0;
 		return 1;
 	}	
@@ -351,6 +378,9 @@ uint8_t Analysis_AT_Cmd(char *pdata)
 	{
 		u8ErrorCnt = 0;
 		xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT | AT_BIT);
+		#ifdef ANALYSIS_PRINT
+		printf("AT ERR\r\n");
+		#endif
 	}
 	return 0;
 }
@@ -397,10 +427,16 @@ uint8_t Analysis_CSQ_Cmd(char *pdata)
 				{
 					u8ErrorCnt = 0;
 					xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT | CSQ_BIT);
+		#ifdef ANALYSIS_PRINT
+		printf("CSQ ERR !\r\n");
+		#endif					
 				}				
 			}
 			else
 			{
+		#ifdef ANALYSIS_PRINT
+		printf("CSQ OK find!\r\n");
+		#endif				
 				u8ErrorCnt=0;
 				return 1;
 			}
@@ -598,6 +634,7 @@ uint8_t Analysis_QHTTPGET_Cmd(char *pdata)
 	ptFindResult = strstr(ptStrStart,"ERROR");
 	if(ptFindResult != NULL)
 	{
+		xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT | QHTTPGET_BIT);
 		return 0;
 	}	
 	return 0;
@@ -632,8 +669,11 @@ uint8_t Analysis_QIDEACT_Cmd(char *pdata)
 	static uint8_t u8ErrorCnt = 0;
 	ptStrStart = (char*)Sim80x.UsartRxBuffer;
 	ptFindResult = strstr(ptStrStart,"OK");
-	if((ptFindResult != NULL) || (u8ErrorCnt == 10))
+	if((ptFindResult != NULL) )
 	{
+		#ifdef ANALYSIS_PRINT
+		printf("QIDEACT OK find!\r\n");
+		#endif		
 		u8ErrorCnt = 0;
 		return 1;
 	}
@@ -643,6 +683,9 @@ uint8_t Analysis_QIDEACT_Cmd(char *pdata)
 		u8ErrorCnt ++;
 		if(u8ErrorCnt == 5)
 		{
+		#ifdef ANALYSIS_PRINT
+		printf("QIDEACT ERR !\r\n");
+		#endif			
 			u8ErrorCnt = 0;
 			xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT | QIDEACT_BIT);
 		}
@@ -689,7 +732,7 @@ void  PostCookingSecsion(void)  //SendReportDataPacket
 	
 	if(REAL_DATA_Credit.CookingSessionSendNumber < REAL_DATA_Credit.CookingSessionEnd)
 	{
-		M26_Sni_Init();
+//		M26_Sni_Init();
 	}
 	
 
@@ -762,7 +805,7 @@ void  PostMeterStatus(void)  //SendReportStatePacket
 	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;	
 	
-	M26_Sni_Init();
+//	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
@@ -815,7 +858,7 @@ void  PostMeterWarning(void)  //SendWarnPacket();
 	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;	
 	
-	M26_Sni_Init();
+//	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
@@ -866,7 +909,7 @@ void  PostMeterHardware(void)  //SendWarnPacket();
 	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;	
 	
-	M26_Sni_Init();
+//	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
@@ -917,7 +960,7 @@ void  PostMeterSettings(void)  //
 	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;	
 	
-	M26_Sni_Init();
+//	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
@@ -969,7 +1012,7 @@ void  GetMeterSettings(void)  //
 	char *cDataTime ;
 	volatile uint16_t u8UrlLength = 0;	
 	
-	M26_Sni_Init();
+//	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	memset(Send_AT_cmd[8].SendCommand,0,20 *sizeof(char));
