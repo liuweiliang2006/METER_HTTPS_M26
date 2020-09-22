@@ -33,6 +33,7 @@ stru_P4_command_t Send_AT_cmd[]={
 /*15*/		{     	16,			 NULL,																														Analysis_POSTDATA_Cmd		}, //POST 指令携带的数据
 /*16*/		{     	17,			 "AT+QHTTPCFG==\"requestheader\",1",															Analysis_QHTTPCFG_Cmd		}, //开启自定义头部功能
 /*17*/		{     	18,			 "AT+QHTTPCFG==\"requestheader\",0",															Analysis_QHTTPCFG_Cmd		}, //关闭自定义头部功能
+
 };
 
 
@@ -481,7 +482,7 @@ uint8_t Analysis_QIACT_Cmd(char *pdata)
 	char *ptStrStart ;
 	char *ptFindResult ;
 	static uint8_t u8ErrorCnt = 0;
-	
+
 	ptStrStart = (char*)Sim80x.UsartRxBuffer;
 	ptFindResult = strstr(ptStrStart,"OK");
 	if(ptFindResult != NULL)
@@ -490,9 +491,16 @@ uint8_t Analysis_QIACT_Cmd(char *pdata)
 	}	
 //	
 	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult == NULL)
+	if(ptFindResult != NULL)
 	{
-		return 1;
+		u8ErrorCnt++;
+		if(u8ErrorCnt == 5)
+		{
+			u8ErrorCnt=0;
+			xEventGroupSetBits(xCreatedEventGroup, ALL_AT_BIT | QIACT_BIT);
+		}
+		
+		return 0;
 	}	
 	return 0;
 }
@@ -958,7 +966,8 @@ void  PostMeterSettings(void)  //
 	char *ptUrl,*ptPost;
 	char *ptPostData;
 	char *cDataTime ;
-	volatile uint16_t u8UrlLength = 0;	
+	volatile uint16_t u8UrlLength = 0;
+	CONFIG_Meter_t stReadMeterConfig;
 	
 //	M26_Sni_Init();
 	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
@@ -972,7 +981,9 @@ void  PostMeterSettings(void)  //
 	
 	printf("******PostMeterSettings******\r\n");
 	refreshSetupPacket(&SetupPacket);
-	encodeSettingsPacket(&ptPostData,&SetupPacket); 
+	MB85RS16A_READ(CONFIG_Meter_Address,(uint8_t*)(&stReadMeterConfig),sizeof(CONFIG_Meter_t));
+	
+	encodeSettingsPacket(&ptPostData,&SetupPacket,&stReadMeterConfig); 
 	
 	struSeverInfo->Sendsever = SEVER_URL;
 	u8UrlLength = strlen(struSeverInfo->Sendsever);

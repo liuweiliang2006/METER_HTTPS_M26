@@ -96,3 +96,6 @@ if(HAL_GetTick()-TimeForSlowRunGPRSFree > 1500)
 20200915 1013
 加入cJSON.c cJSON.h文件，并测试成功
 问题：跑机老化时，会自动重启。
+
+20200922 
+字段对接，国内版本可连接AWS，国外版本需要增加APN PIN等设置

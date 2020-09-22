@@ -18,6 +18,7 @@
 #include "encode.h"
 #include "iwdg.h"
 #include "gas.h"
+#include "MB85RS16A.h"
 
 #include "cJSON.h"
 #endif

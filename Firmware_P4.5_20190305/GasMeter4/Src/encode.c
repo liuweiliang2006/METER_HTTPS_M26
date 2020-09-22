@@ -28,13 +28,13 @@ void encodeCookingPacket(char **sendMeagess,CookingSessionReport_t *rPacket)
 	strcat(*sendMeagess,"{\"cookingSessionId\":\"220erbdsbudwofjewo4234fdwb\",");
 	
 	strcat(*sendMeagess,"\"startTime\":\"");
-	DataTimeFormat(&cDataTime,rPacket->SESSION_END_TIME);
+	DataTimeFormat(&cDataTime,rPacket->SESSION_START_TIME);
 	strcat(*sendMeagess,cDataTime);
 	strcat(*sendMeagess,",");
 	free(cDataTime);
 	
 	strcat(*sendMeagess,"\"endTime\":\"");
-	DataTimeFormat(&cDataTime,rPacket->SESSION_START_TIME);
+	DataTimeFormat(&cDataTime,rPacket->SESSION_END_TIME);
 	strcat(*sendMeagess,cDataTime);
 	strcat(*sendMeagess,",");
 	free(cDataTime);
@@ -331,7 +331,7 @@ void encodeHardwarePacket(char **sendMeagess,InformationPacket_t *rPacket)
 }
 
 
-void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
+void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket,CONFIG_Meter_t *ptMeterConf)
 {
 	char *cDataTime ;
 	
@@ -357,28 +357,32 @@ void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"dataUploadPeriod\":");
-	strcat(*sendMeagess,"360");
-//	strcat(*sendMeagess,rPacket->UpdatePeriod);
+//	strcat(*sendMeagess,"360");
+	sprintf(rPacket->UpdatePeriod,"%d",ptMeterConf->UpDuty);
+	strcat(*sendMeagess,rPacket->UpdatePeriod);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"warningLowBatteryVoltage\":");
-	strcat(*sendMeagess,"4.5");
-//	strcat(*sendMeagess,rPacket->LowBattery);
+//	strcat(*sendMeagess,"4.5");
+	sprintf(rPacket->LowBattery,"%f",ptMeterConf->LowBattery);
+	strcat(*sendMeagess,rPacket->LowBattery);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"warningLowCreditBalance\":");
-	strcat(*sendMeagess,"80");
-//	strcat(*sendMeagess,rPacket->LowCredit);
+//	strcat(*sendMeagess,"80");
+	sprintf(rPacket->LowCredit,"%f",ptMeterConf->LowCredit);
+	strcat(*sendMeagess,rPacket->LowCredit);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"warningLowGasVolumeAlarm\":");
-	strcat(*sendMeagess,"2000");
-//	strcat(*sendMeagess,rPacket->LowGasVolume);
+//	strcat(*sendMeagess,"2000");
+	sprintf(rPacket->LowGasVolume,"%f",ptMeterConf->LowGasVolume);
+	strcat(*sendMeagess,rPacket->LowGasVolume);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"metercurrency\":\"");
-	strcat(*sendMeagess,"KSH");
-//	strcat(*sendMeagess,rPacket->Currency);
+//	strcat(*sendMeagess,"KSH");
+	strcat(*sendMeagess,ptMeterConf->CURRENCY);
 	strcat(*sendMeagess,"\"");
 	strcat(*sendMeagess,",");
 	
@@ -387,8 +391,9 @@ void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"uploadTime\":");
-	strcat(*sendMeagess,"0");
-//	strcat(*sendMeagess,rPacket->StartPeriod);
+//	strcat(*sendMeagess,"0");
+	sprintf(rPacket->StartPeriod,"%d",ptMeterConf->StartDuty);
+	strcat(*sendMeagess,rPacket->StartPeriod);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"sensorSlope\":");

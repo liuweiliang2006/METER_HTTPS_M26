@@ -46,10 +46,19 @@ void GetAnalyse(uint8_t *ptRecData)
 			{
 				test_arr = cJSON_GetObjectItem(json,"message");
 				
+				item = cJSON_GetObjectItem(test_arr,"serverIpAddress"); 					//IP地址
+				memcpy(Value,item->valuestring,strlen(item->valuestring));
+				strncpy(CONFIG_GPRS.Server_IP,Value,strlen(Value));
+				memset(Value,0,REC_COM_LEN);
+				
+				item = cJSON_GetObjectItem(test_arr,"serverPort"); 					//端口号
+				JsonValue = item->valueint;
+				sprintf(CONFIG_GPRS.Socket_Port,"%d",(uint32_t)JsonValue);
+				
+				
 				item = cJSON_GetObjectItem(test_arr,"dataUploadPeriod"); 					//上传周期
 				JsonValue = item->valueint;
 				CONFIG_Meter.UpDuty = (uint32_t) JsonValue;
-				CONFIG_Meter.UpDuty = 20;
 				
 				item = cJSON_GetObjectItem(test_arr,"warningLowBatteryVoltage");	//报警电压阈值
 				memcpy(Value,item->valuestring,strlen(item->valuestring));
@@ -57,7 +66,7 @@ void GetAnalyse(uint8_t *ptRecData)
 				memset(Value,0,REC_COM_LEN);
 				
 				item = cJSON_GetObjectItem(test_arr,"warningLowCreditBalance"); 	//卡内余额报敬阈值
-				JsonValue = item->valueint;
+				JsonValue = item->valuedouble;
 				CONFIG_Meter.LowCredit = JsonValue;
 				
 				item = cJSON_GetObjectItem(test_arr,"warningLowGasVolumeAlarm"); 	//罐内气体余量阈值
@@ -70,7 +79,20 @@ void GetAnalyse(uint8_t *ptRecData)
 				strncpy(CONFIG_Meter.CURRENCY,Value,3);
 				memset(Value,0,REC_COM_LEN);
 				
-				CONFIG_Meter_Write();
+				CONFIG_Meter_Write(); //保存表信息 
+				
+				
+				item = cJSON_GetObjectItem(test_arr,"sensorSlope");	//斜率
+				memcpy(Value,item->valuestring,strlen(item->valuestring));
+				sscanf(Value,"%f",&REAL_DATA_CALIBRATION.slope);
+				memset(Value,0,REC_COM_LEN);
+				
+				item = cJSON_GetObjectItem(test_arr,"sensorIntercept"); 	//原点
+				JsonValue = item->valueint;
+				REAL_DATA_CALIBRATION.zero = JsonValue;
+				
+//				CALIBRATION_Voltage_Write();  //保存斜率与原点
+				
 				
 				cJSON_Delete(json);
 			}

@@ -11,7 +11,6 @@ void encodeCookingPacket(char **sendMeagess,CookingSessionReport_t *rPacket);
 void encodeMeterStatusPacket(char **sendMeagess,reportStatePacket_t *rPacket);
 void encodeWarningsPacket(char **sendMeagess,waringPacket_t *rPacket);
 void encodeHardwarePacket(char **sendMeagess,InformationPacket_t *rPacket);
-void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket);
-void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket);
+void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket,CONFIG_Meter_t *ptMeterConf);
 
 #endif

@@ -19,6 +19,7 @@
 #define QHTTPPOST_BIT 	(1<<12)	//AT+QHTTPPOST
 #define POSTDATA_BIT 		(1<<13)	//AT+POSTDATA
 #define QHTTPCFG_BIT		(1<<14) //AT+QHTTPCFG
+
 #define ALL_AT_BIT			(1<<23) //有任意一AT指令错误，该位置位
 
 typedef uint8_t (*Cmd_Analysis)(char *pCmd);

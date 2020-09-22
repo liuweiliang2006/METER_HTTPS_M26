@@ -102,7 +102,7 @@ extern "C" {
 
 /* Definitions specific to the port being used. */
 #include "portable.h"
-#define configCHECK_FOR_STACK_OVERFLOW   2
+//#define configCHECK_FOR_STACK_OVERFLOW   2
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
 #ifndef configUSE_NEWLIB_REENTRANT
 	#define configUSE_NEWLIB_REENTRANT 0
