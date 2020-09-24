@@ -2530,12 +2530,20 @@ void StartDefaultTask(void const * argument)
 								GSM_ON_FLAG = 0;
 								//发送做饭数据，该部分长按或RTC定时发送，
 								//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
-								if(IsNeedSendCook == true)  //PostCookingSecsion
+								if((IsNeedSendCook == true) || (IsNeedTimeing ==  true))  //PostCookingSecsion
 								{
 //									__HAL_RCC_WWDG_CLK_DISABLE();
-									IsNeedSendCook = 0;
+									if(IsNeedSendCook == true)
+									{
+										printf("Long press!\r\n");
+										IsNeedSendCook = false;
+									}
+									if(IsNeedTimeing ==  true)
+									{
+										printf("send IsNeedTimeing!\r\n");
+										IsNeedTimeing = false;
+									}									
 									
-									printf("Long press!\r\n");
 									M26_HTTP_Init();
 //									HAL_IWDG_Refresh(&hiwdg);
 									PostCookingSecsion();
@@ -2549,29 +2557,28 @@ void StartDefaultTask(void const * argument)
 									PostMeterHardware();
 									PostMeterStatus();
 //									HAL_IWDG_Refresh(&hiwdg);
-									printf("GetMeterSettings!\r\n");
 									LL_VCC(1);
 								}
-								else if(IsNeedTimeing ==  true) //PostCookingSecsion
-								{
-									IsNeedTimeing = false;
-									printf("send IsNeedTimeing!\r\n");
-									M26_HTTP_Init();
-									PostCookingSecsion();
-									GetMeterSettings();
-									u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
-									if(u32GetCmdValue & GET_CMD_STUP)
-									{
-										xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
-										PostMeterSettings();
-									}
-									PostMeterHardware();
-									PostMeterStatus();
-									printf("end IsNeedTimeing!\r\n");
-									TimeForCurrStart = HAL_GetTick();		
-			
-									HearRetryNumber = 0;
-								}
+//								else if(IsNeedTimeing ==  true) //PostCookingSecsion
+//								{
+//									IsNeedTimeing = false;
+//									printf("send IsNeedTimeing!\r\n");
+//									M26_HTTP_Init();
+//									PostCookingSecsion();
+//									GetMeterSettings();
+//									u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
+//									if(u32GetCmdValue & GET_CMD_STUP)
+//									{
+//										xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
+//										PostMeterSettings();
+//									}
+//									PostMeterHardware();
+//									PostMeterStatus();
+//									printf("end IsNeedTimeing!\r\n");
+//									TimeForCurrStart = HAL_GetTick();		
+//			
+//									HearRetryNumber = 0;
+//								}
 								else if(IsNeedWarning == true)//报警信息 PostMeterWarning
 								{
 									printf("send PostMeterWarning!\r\n");
@@ -2709,9 +2716,9 @@ void StartDefaultTask(void const * argument)
 	#ifdef LWL_DEBUG
 					printf("line %d\r\n",__LINE__);
 	#endif
-//	printf("IntoLowPower\r\n");
+					printf("IntoLowPower\r\n");
             HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-						
+					printf("jump Low Power\r\n");	
 		#ifdef LWL_DEBUG
 					printf("line %d\r\n",__LINE__);
 	#endif					

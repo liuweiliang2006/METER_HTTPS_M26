@@ -102,3 +102,6 @@ if(HAL_GetTick()-TimeForSlowRunGPRSFree > 1500)
 
 20200924 
 加入APN，建立一次通道，实现POST GET
+
+20200924 
+长按与定时逻辑分支合并
