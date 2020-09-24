@@ -1,0 +1,147 @@
+curl -X GET "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/settings/TZ00000525" --header "Content-Type: application/json"
+
+curl -X POST "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/hardware/TZ00000131" --header "Content-Type: application/json" --data-raw "{\"pcbVersion\": \"23242v2\",\"mcuFirmwareVersion\": \"P5.0.A.200518\",\"mcuFirmwareCompileDate\": \"2016-08-29T09:12:33.001Z\",\"modemFirmwareVersion\": \"1752B13SIM7029E\",\"batteryModel\": \"aaa22\",\"batterySerialNumberList\": [\"BAT 18650-00208\", \"BAT 18650-001223\"],\"iflowSerialNumber\": \"aaa22\",\"hardwareDatestamp\": \"2016-08-29T09:12:33.001Z\"}"
+
+[11:27:16.318]发→◇AT
+□
+[11:27:16.329]收←◆AT
+OK
+
+[11:27:32.981]收←◆
++CFUN: 1
+
+[11:27:33.333]收←◆
++CPIN: READY
+
+[11:27:36.548]收←◆
+Call Ready
+
+[11:27:40.388]收←◆
+SMS Ready
+
+//Foreign need config
+//AT+CGDCONT=1,"IP","APNName"   note:According to the ACTUAL SIM card
+//AT+CPIN="pin"   note:According to the ACTUAL SIM card
+
+[11:29:05.668]发→◇AT+CSQ
+
+□
+[11:29:05.682]收←◆AT+CSQ
++CSQ: 31,0
+
+OK
+
+[11:29:31.116]发→◇AT+CGREG?
+
+
+□
+[11:29:31.133]收←◆AT+CGREG?
++CGREG: 0,1
+
+OK
+
+[11:29:46.652]发→◇AT+CGATT=1
+
+□
+[11:29:46.665]收←◆AT+CGATT=1
+OK
+
+[11:29:57.732]发→◇AT+QSSLCFG="sni",0,1
+□
+[11:29:57.750]收←◆AT+QSSLCFG="sni",0,1
+OK
+
+[11:30:18.499]发→◇AT+QIDEACT
+□
+[11:30:18.515]收←◆AT+QIDEACT
+DEACT OK
+
+[11:30:34.164]发→◇AT+QIREGAPP="kopagas","",""  // need config AT+QIREGAPP="apn","username","password"
+□
+[11:30:34.177]收←◆AT+QIREGAPP="kopagas","",""
+OK
+
+[11:30:41.156]发→◇AT+QIACT
+□
+[11:30:41.168]收←◆AT+QIACT
+[11:30:41.584]收←◆
+OK
+
+[11:30:54.475]发→◇AT+QILOCIP
+□
+[11:30:54.494]收←◆AT+QILOCIP
+100.97.244.25
+
+[11:31:05.340]发→◇AT+QSSLCFG="https",1
+□
+[11:31:05.356]收←◆AT+QSSLCFG="https",1
+OK
+
+[11:31:18.092]发→◇AT+QSSLCFG="httpsctxi",0
+□
+[11:31:18.105]收←◆AT+QSSLCFG="httpsctxi",0
+OK
+
+[11:31:27.133]发→◇at+qhttpcfg="CONTENT-TYPE","application/json"
+□
+[11:31:27.145]收←◆at+qhttpcfg="CONTENT-TYPE","application/json"
+OK
+
+[11:31:34.428]发→◇AT+QHTTPURL=88
+□
+[11:31:34.439]收←◆AT+QHTTPURL=88
+CONNECT
+
+[11:31:43.924]发→◇https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/settings/TZ00000525
+□
+[11:31:43.941]收←◆
+OK
+
+[11:31:51.179]发→◇AT+QHTTPGET=60,120
+□
+[11:31:51.189]收←◆AT+QHTTPGET=60,120
+[11:32:21.086]收←◆
+OK
+
+[11:32:27.836]发→◇AT+QHTTPREAD
+□
+[11:32:27.886]收←◆AT+QHTTPREAD
+CONNECT
+{"statusCode":"MeterSettingsFound-200","message":{"command":"STUP","serverIpAddress":"198.51.100.42","serverPort":5070,"serverURL":0,"gasLevel":"999.999","dataUploadPeriod":360,"warningLowBatteryVoltage":"4.50","warningLowCreditBalance":80,"warningLowGasVolumeAlarm":"99.99","meterCurrency":"KSH","uploadFrequency":360,"sensorSlope":"2","sensorIntercept":0.1,"settingDatestamp":"2020-09-24 0"}}
+
+OK
+
+[11:32:43.171]发→◇AT+QHTTPURL=88
+□
+[11:32:43.179]收←◆AT+QHTTPURL=88
+CONNECT
+
+[11:32:51.604]发→◇https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/hardware/TZ00000131
+□
+[11:32:51.625]收←◆
+OK
+
+[11:33:00.422]发→◇AT+QHTTPPOST=314
+□
+[11:33:00.440]收←◆AT+QHTTPPOST=314
+[11:33:11.046]收←◆
+CONNECT
+
+[11:33:13.349]发→◇{"pcbVersion":"HV5.0.191111","mcuFirmwareVersion":"0921","mcuFirmwareCompileDate":"2016-08-29T09:12:33.001Z","modemFirmwareVersion":"1752B13SIM7029E","batteryModel":"TX123","batterySerialNumberList":["BAT 18650-00208", "BAT 18650-001223"],"iflowSerialNumber":"aaa22","hardwareDatestamp":"2020-09-22T00:00:16.001Z"}
+□
+[11:33:36.114]收←◆
+OK
+
+[11:33:42.300]发→◇AT+QHTTPREAD
+□
+[11:33:42.306]收←◆AT+QHTTPREAD
+CONNECT
+{"statusCode":"Data recorded-201","message":"New Record for meter TZ00000131 Added"}
+
+OK
+
+[11:33:50.764]发→◇AT+QIDEACT
+□
+[11:33:50.772]收←◆AT+QIDEACT
+[11:33:51.149]收←◆
+DEACT OK

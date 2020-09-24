@@ -46,7 +46,7 @@ extern SemaphoreHandle_t  Semaphore_Uart_Rec;
 extern EventGroupHandle_t xCreatedEventGroup;  //事件标志组，用于指示AT指令的错误，遇错误置相应位
 	
 void AppObjCreate (void);
-void M26_Sni_Init(void );
+void M26_HTTP_Init(void );
 void  PostCookingSecsion(void);
 void  PostMeterStatus(void);
 void  PostMeterWarning(void);

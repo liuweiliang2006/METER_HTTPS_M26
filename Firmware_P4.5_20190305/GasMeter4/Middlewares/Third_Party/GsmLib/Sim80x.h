@@ -410,7 +410,7 @@ bool                    GPRS_HttpGet(char *URL);
 uint8_t 								GPRS_GreatTcpSocket(char *ip,char *port);
 bool										GPRS_TcpSendMessage(char *message);
 
-
+bool  GPRS_SetSni();
 
 //######################################################################################################################
 

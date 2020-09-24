@@ -79,7 +79,8 @@ void GetAnalyse(uint8_t *ptRecData)
 				strncpy(CONFIG_Meter.CURRENCY,Value,3);
 				memset(Value,0,REC_COM_LEN);
 				
-				CONFIG_Meter_Write(); //保存表信息 
+				IsSaveCONFIG_Meter = true;
+//				CONFIG_Meter_Write(); //保存表信息 
 				
 				
 				item = cJSON_GetObjectItem(test_arr,"sensorSlope");	//斜率

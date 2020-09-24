@@ -52,13 +52,13 @@ void  Sim80x_GPRSClose(int16_t cStep)
 		TimeForCurrStart=0;	
 		GSM_ON_FLAG = 0;
 		
-		if(connectStep == 11)
-		{
-			if(GPRS_CloseSocket() == true)
-			{
-				//osDelay(500);
-			}
-		}
+//		if(connectStep == 11)
+//		{
+//			if(GPRS_CloseSocket() == true)
+//			{
+//				//osDelay(500);
+//			}
+//		}
 		
 		connectStep = -1;
 		

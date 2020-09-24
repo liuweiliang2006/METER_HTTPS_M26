@@ -8,8 +8,8 @@ EventGroupHandle_t xCreatedEventGroup = NULL;
 #define SEVER_URL "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/"
 #define SEVER_VERSION "testing/"
 
-#define M26GETCOMMANDLEN 13
-#define M26POSTCOMMANDLEN 15
+#define M26GETCOMMANDLEN 4
+#define M26POSTCOMMANDLEN 5
 #define ANALYSIS_PRINT 1
 
 
@@ -37,9 +37,9 @@ stru_P4_command_t Send_AT_cmd[]={
 };
 
 
-uint8_t u8GetNum[M26GETCOMMANDLEN]= {0,1,2,3,4,5,6,7,8,9,10,11,12};
-uint8_t u8PostNum[M26POSTCOMMANDLEN] = {0,1,2,3,4,5,6,7,8,9,13,14,15,11,12};
-uint8_t u8SniNum[3] = {0,1,5};
+uint8_t u8GetNum[M26GETCOMMANDLEN]= {8,9,10,11};
+uint8_t u8PostNum[M26POSTCOMMANDLEN] = {8,9,14,15,11};
+uint8_t u8HTTPNum[3] = {6,7,13};
 
 /* 实现itoa函数的源码 */ 
 static char *myitoa(int num,char *str,int radix) 
@@ -224,23 +224,20 @@ static void CmdLength(uint16_t urllength,uint8_t cmd_num)
 }
 
 //向AWS发送GET请求
-static void SendGetCommand()
+static ErrorStatus SendGetCommand()
 {
 	uint8_t i = 0;
 	EventBits_t event_value = 0;
 	uint8_t u8QIDEACTSendcnt = 0; //用于记录AT+QIDEACT的次数
+	uint8_t u8ErrorFlag = 0;
+	
 	xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 	for(i=0;i< M26GETCOMMANDLEN;i++)
 	{
-		if((u8GetNum[i]!=5))
-		{
-			
 			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	
-			printf("send:%d %s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].u8CmdNum,Send_AT_cmd[u8PostNum[i]].SendCommand); 
+			printf("send:%d %s\r\n\r\n",Send_AT_cmd[u8GetNum[i]].u8CmdNum,Send_AT_cmd[u8PostNum[i]].SendCommand); 
 			while(!Sim80x.AtCommand.FindAnswer)
-			{
-				
+			{				
 				event_value = xEventGroupGetBits(xCreatedEventGroup);
 				if(event_value != 0)
 				{
@@ -248,26 +245,33 @@ static void SendGetCommand()
 					i = M26GETCOMMANDLEN -1; //遇到AT指令的错误，则让使其在下一次循环当中让其断开
 					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 					event_value = 0;
+					u8ErrorFlag = 1;
+					break;
 				}
 //				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
 //				{
 						HAL_IWDG_Refresh(&hiwdg);
 //				}
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
-				xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);
+				xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
-				osDelay(1000);
-				if( i == M26GETCOMMANDLEN -1)
-				{
-					u8QIDEACTSendcnt++;
-					if(u8QIDEACTSendcnt == 5)
-					{
-						break;
-					}
-				}
+//				osDelay(1000);
+//				if( i == M26GETCOMMANDLEN -1)
+//				{
+//					u8QIDEACTSendcnt++;
+//					if(u8QIDEACTSendcnt == 5)
+//					{
+//						break;
+//					}
+//				}
 			}
-		}		
 	}
+	if (u8ErrorFlag !=0) 
+	{
+		u8ErrorFlag = 0;
+		return ERROR;
+	}
+	return SUCCESS;
 }
 
 //向AWS发送POST请求
@@ -281,12 +285,8 @@ static ErrorStatus SendPostCommand()
 	xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 //	for(i=0;i< sizeof(Send_AT_cmd)/sizeof(Send_AT_cmd[0]);i++)M26GETCOMMANDLEN
 	for(i=0;i< M26POSTCOMMANDLEN;i++)
-	{
-		if((u8PostNum[i]!=5))
-		{
-			
+	{		
 			Sim80x.AtCommand.FindAnswer = 0;
-	 
 			printf("send:%d %s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].u8CmdNum,Send_AT_cmd[u8PostNum[i]].SendCommand);
 			while(!Sim80x.AtCommand.FindAnswer)
 			{				 
@@ -298,6 +298,7 @@ static ErrorStatus SendPostCommand()
 					xEventGroupClearBits( xCreatedEventGroup,0xffffff );
 					event_value = 0;
 					u8ErrorFlag = 1;
+					break;
 				}
 //				if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
 //				{
@@ -306,20 +307,19 @@ static ErrorStatus SendPostCommand()
 				memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);
 				xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);
 				Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"OK\r\n");
-				osDelay(1000);	
-				if( i == M26POSTCOMMANDLEN -1)
-				{
-					u8QIDEACTSendcnt++;
-					if(u8QIDEACTSendcnt == 5)
-					{
-						break;
-					}
-				}
+//				osDelay(1000);	
+//				if( i == M26POSTCOMMANDLEN -1)
+//				{
+//					u8QIDEACTSendcnt++;
+//					if(u8QIDEACTSendcnt == 5)
+//					{
+//						break;
+//					}
+//				}
 			}
-		}
 //		osDelay(5000);
 	}
-	if (u8ErrorFlag) 
+	if (u8ErrorFlag!=0) 
 	{
 		u8ErrorFlag = 0;
 		return ERROR;
@@ -329,15 +329,15 @@ static ErrorStatus SendPostCommand()
 
 
 //M26 SNI功能测试，在GET和POST前要打开SNI功能 对于模块来说只进行一次初始化即可。
-void M26_Sni_Init(void )
+void M26_HTTP_Init(void )
 {
 	uint8_t i = 0;
 	for(i = 0;i < 3;i++)
 	{
 		{
-			printf("send %s\r\n\r\n",Send_AT_cmd[u8SniNum[i]].SendCommand);
+			printf("send %s\r\n\r\n",Send_AT_cmd[u8HTTPNum[i]].SendCommand);
 			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8SniNum[i]].u8CmdNum,(TickType_t)10);	 
+			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8HTTPNum[i]].u8CmdNum,(TickType_t)10);	 
 //			Sim80x_SendAtCommand(Send_AT_cmd[u8SniNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
 //			osDelay(2000);
 			while(!Sim80x.AtCommand.FindAnswer)
@@ -347,7 +347,7 @@ void M26_Sni_Init(void )
 						HAL_IWDG_Refresh(&hiwdg);
 //				}
 				{
-					Sim80x_SendAtCommand(Send_AT_cmd[u8SniNum[i]].SendCommand,1000,1,"OK\r\n");
+					Sim80x_SendAtCommand(Send_AT_cmd[u8HTTPNum[i]].SendCommand,1000,1,"OK\r\n");
 					osDelay(2000);
 				}				
 			}

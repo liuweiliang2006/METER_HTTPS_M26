@@ -2169,65 +2169,426 @@ void StartDefaultTask(void const * argument)
         //联网的逻辑
         if(GSM_ON_FLAG == 1)// && IsReadVoltage == false
         {
-					GSM_ON_FLAG = 0;
-					
-					//恢复与无线模组通讯的任务，并开始与AWS通信
-					//vTaskResume();
-					
-					//发送做饭数据，该部分长按或RTC定时发送，
-					//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
-					if(IsNeedSendCook == true)  //PostCookingSecsion
-					{
-//						__HAL_RCC_WWDG_CLK_DISABLE();
-						IsNeedSendCook = 0;
-						
-						printf("Long press!\r\n");
-						M26_Sni_Init();
-//						HAL_IWDG_Refresh(&hiwdg);
-						PostCookingSecsion();
-						GetMeterSettings();
-						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
-						if(u32GetCmdValue & GET_CMD_STUP)
-						{
-							xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
-							PostMeterSettings();
-							PostMeterHardware();
-							PostMeterStatus();
-						}
-//						HAL_IWDG_Refresh(&hiwdg);
-						printf("GetMeterSettings!\r\n");
-						LL_VCC(1);
-					}
-					else if(IsNeedTimeing ==  true) //PostCookingSecsion
-					{
-						IsNeedTimeing = false;
-						printf("send IsNeedTimeing!\r\n");
-						M26_Sni_Init();
-						GetMeterSettings();
-						u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
-						if(u32GetCmdValue & GET_CMD_STUP)
-						{
-							xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
-							PostMeterSettings();
-							PostMeterHardware();
-							PostMeterStatus();
-						}
-						printf("end IsNeedTimeing!\r\n");
-						TimeForCurrStart = HAL_GetTick();		
+						switch(connectStep)
+            {
+            case 0://执行到这里就停止了
+                //printf("start connectStep ----> %d\r\n",connectStep);
+                TimeForPowerStart = HAL_GetTick();
+                TimeForCurrStart = HAL_GetTick();
+                connectStep = 1;//初始化联网需要的参数
+                break;
+            case 1://执行上电的操作与判断
+                //printf("Sim80x.Status.Power %d\r\n",Sim80x.Status.Power);
+                if(Sim80x.Status.Power==1)
+                {
+                    connectStep = 2;//上电成功为2
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();
+                }
+                else
+                {
+                    if(HAL_GetTick() - TimeForCurrStart >= 10 * 1000 )//开机10秒AT模块没有反应,重试两次,一共三次,模块坏了,1长
+                    {
+                        loopSumCurr++;
+                        if(loopSumCurr >= 3)
+                        {
+                            //模块坏了  也可能是注册过程中出现了  0
+                            if(sStep != 0)
+                            {
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_SET);
+//                                osDelay(500);
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_RESET);
+//                                osDelay(500);
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_SET);
+//                                osDelay(500);
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_RESET);
+                            }
+                            if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                            {
+                                HAL_IWDG_Refresh(&hiwdg);
+                            }
+                            Sim80x_GPRSClose(1);
+                            //加屏幕提示
+                            //DisplayChar(1,1,"---GPRS Error---");
+                        }
+                        else
+                        {
+                            if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                            {
+                                HAL_IWDG_Refresh(&hiwdg);
+                            }
+                            Sim80x_SetPower(false);
+                            osDelay(2000);
+                            if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                            {
+                                HAL_IWDG_Refresh(&hiwdg);
+                            }
+                            printf("Sim80x_SetPower(true)5\r\n");
+                            Sim80x_SetPower(true);
+                            TimeForCurrStart = HAL_GetTick();
+                        }
+                    }
+                }
+                break;
+            case 2:
+                if(strcmp(CONFIG_GPRS.USE_GPRS_APN, "1")==0)
+                {
+                    if(true == GPRS_CGDCONT(CONFIG_GPRS.APN))
+                    {
+                        TimeForCurrStart=HAL_GetTick();//PDP(Packet Data Protocol )成功的时间
+                        loopSumCurr = 0;
+                        connectStep = 3;
+                    }
+                    else
+                    {
+                        if(HAL_GetTick() - TimeForCurrStart >= 5 * 1000 )
+                        {
+                            loopSumCurr++;
+                            if(loopSumCurr >= 3)
+                            {
+                                if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                                {
+                                    HAL_IWDG_Refresh(&hiwdg);
+                                }
+                                Sim80x_GPRSClose(2);
 
-						HearRetryNumber = 0;
-					}
-					else if(IsNeedWarning == true)//报警信息 PostMeterWarning
-					{
-						printf("send PostMeterWarning!\r\n");
-						M26_Sni_Init();
-						PostMeterWarning(); 
-						printf("end PostMeterWarning!\r\n");
-//						__HAL_RCC_WWDG_CLK_ENABLE();
-						IsNeedWarning = false;
-						HearRetryNumber = 0;
-					}
-					Sim80x_GPRSClose(0);
+                                //加屏幕提示
+                                //DisplayChar(1,1,"---GPRS Error---");
+                            }
+                            else
+                            {
+                                if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                                {
+                                    HAL_IWDG_Refresh(&hiwdg);
+                                }
+                                Sim80x_SetPower(false);
+                                osDelay(2000);
+                                printf("Sim80x_SetPower(true)4\r\n");
+                                Sim80x_SetPower(true);
+                                TimeForCurrStart = HAL_GetTick();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    loopSumCurr = 0;
+                    connectStep = 3;
+                    TimeForCurrStart=HAL_GetTick();//PDP(Packet Data Protocol )成功的时间
+                }
+                break;
+            case 3:
+                if(Sim80x.Status.SimCard != 0)
+                {
+                    if(Sim80x.Status.SimCard == 2)
+                    {
+                        //Sim80x_SendAtCommand("AT+CPIN=\"4294\"\r\n",2000,1,"OK");
+											GPRS_SetPin(CONFIG_GPRS.Pin);
+                    }
+                    IsHaveSimError = false;
+                    connectStep = 4;//寻找到SIM卡
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//开始注册开始计时
+                }
+                else
+                {
+                    if(HAL_GetTick() - TimeForCurrStart >= 15 * 1000 )
+                    {
+                        IsHaveSimError = true;
+                        if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                        {
+                            HAL_IWDG_Refresh(&hiwdg);
+                        }
+                        Sim80x_GPRSClose(3);
+                    }
+                }
+                break;
+            case 4:
+                if(Sim80x.Status.RegisterdToNetwork==1)//成功了下一条
+                {
+                    connectStep = 5;//注册成功为5
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//网络注册成功的时间
+                    //DisplayChar(1,1,"--Register  OK--");
+                }
+                else if(Sim80x.Status.RegisterdToNetwork == 3 || HAL_GetTick() - TimeForCurrStart >= 60 * 1000 * 10)//不成功或者超时重新来过
+                {
+
+                    loopSumCurr++;
+                    //printf("RegisterdToNetwork:%d\r\n",Sim80x.Status.RegisterdToNetwork);
+                    //printf("RegisterdToNetwork:%d  |  %d\r\n",HAL_GetTick() - TimeForCurrStart,20 * 1000);
+                    //printf("Reging loopSumCurr:%d\r\n",loopSumCurr);
+
+                    if(loopSumCurr >= 3)
+                    {
+                        //没有注册成功
+                        if(sStep != 0)
+                        {
+//                            HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_SET);
+//                            osDelay(500);
+//                            HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_RESET);
+                        }
+                        if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                        {
+                            HAL_IWDG_Refresh(&hiwdg);
+                        }
+                        Sim80x_GPRSClose(4);
+
+                        //加屏幕提示注册未成功
+                        //DisplayChar(1,1,"-Register ERROR-");
+                    }
+                    else
+                    {
+                        if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                        {
+                            HAL_IWDG_Refresh(&hiwdg);
+                        }
+                        Sim80x_SetPower(false);
+                        osDelay(2000);
+                        printf("Sim80x_SetPower(true)3\r\n");
+                        Sim80x_SetPower(true);
+                        TimeForCurrStart = HAL_GetTick();
+                        //DisplayChar(1,1,"-ReRegister ing-");
+                    }
+                }
+                else//测试中不停发送CGREG
+                {
+                    if(HAL_GetTick() - TimeForCurrStart > 1000)
+                    {
+                        Sim80x_SendAtCommand("AT+CSQ\r\n",200,1,"\r\n+CSQ:"); //信号质量
+                        //Sim80x_SendAtCommand("AT+CBC\r\n",200,1,"\r\n+CBC:"); //模块的电压
+                        Sim80x_SendAtCommand("AT+CGREG?\r\n",200,1,"\r\n+CGREG:");
+                        //Gsm_MsgGetMemoryStatus();//选择短信存储地点
+                        osDelay(2000);
+                        //printf("okokokokokokokokokokokokokokokokokokokokokokokokokokokok\r\n");
+                    }
+
+                }
+                break;
+            case 5:
+                if(GPRS_StartCGATT(loopSumCurr)==true)
+                {
+                    connectStep = 6;
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//附加网络成功的时间
+                }
+                else
+                {
+                    if(HAL_GetTick() - TimeForCurrStart >= 10 * 1000 )
+                    {
+                        loopSumCurr++;
+
+                        if(loopSumCurr >= 3)
+                        {
+                            //附加网络失败
+                            if(sStep != 0)
+                            {
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_SET);
+//                                osDelay(500);
+//                                HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_RESET);
+                            }
+                            if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                            {
+                                HAL_IWDG_Refresh(&hiwdg);
+                            }
+                            Sim80x_GPRSClose(5);
+
+                            //加屏幕提示注册未成功
+                            //DisplayChar(1,1,"-Register ERROR-");
+                        }
+                        else
+                        {
+                            TimeForCurrStart = HAL_GetTick();
+                            //DisplayChar(1,1,"-ReRegister ing-");
+                        }
+                    }
+                }
+                break;
+            case 6:
+                if(GPRS_SetSni()==false)
+                {
+                    loopSumCurr++;
+                    printf("\r\nsni loopSumCurr7 %d\r\n",loopSumCurr);
+                    if(loopSumCurr >= 3)
+                    {
+                        //附加网络失败
+                        if(sStep != 0)
+                        {
+                        }
+                        if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                        {
+                            HAL_IWDG_Refresh(&hiwdg);
+                        }
+                    }
+                    else
+                    {
+                        TimeForCurrStart = HAL_GetTick();
+                    }
+                }
+                else
+                {
+                    connectStep = 7;
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//成功的时间
+                }
+                break;
+						case 7:							
+                if(GPRS_DeactivatePDPContext()==false)
+                {
+                    loopSumCurr++;
+                    printf("\r\nloopSumCurr6 %d\r\n",loopSumCurr);
+                    if(loopSumCurr >= 3)
+                    {
+                        //附加网络失败
+                        if(sStep != 0)
+                        {
+//                            HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_SET);
+//                            osDelay(500);
+//                            HAL_GPIO_WritePin(BEEP_GPIO_Port,BEEP_Pin,GPIO_PIN_RESET);
+                        }
+                        if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                        {
+                            HAL_IWDG_Refresh(&hiwdg);
+                        }
+                        Sim80x_GPRSClose(6);
+
+                        //加屏幕提示注册未成功
+                        //DisplayChar(1,1,"-Register ERROR-");
+                    }
+                    else
+                    {
+                        TimeForCurrStart = HAL_GetTick();
+                        //DisplayChar(1,1,"-ReRegister ing-");
+                    }
+                }
+                else
+                {
+                    connectStep = 8;
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//成功的时间
+                }
+                break;
+            case 8:
+                if(strcmp(CONFIG_GPRS.USE_GPRS_APN, "1") == 0)
+                {
+                    GPRS_SetAPN(CONFIG_GPRS.APN,CONFIG_GPRS.APN_UserName,CONFIG_GPRS.APN_Password);
+                }
+                else
+                {
+                    if(GPRS_GetAPN(pAPN,pAPN_UserName,pAPN_Password) == true)
+                    {
+                        GPRS_SetAPN(pAPN,pAPN_UserName,pAPN_Password);
+                    }
+                }
+                connectStep = 9;
+                loopSumCurr = 0;
+                if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                {
+                    HAL_IWDG_Refresh(&hiwdg);
+                }
+                TimeForCurrStart = HAL_GetTick();//成功的时间
+                break;
+            case 9:
+                //printf("\r\nloopSumPDP %d\r\n",loopSumPDP);
+                if(loopSumPDP >= 3)//如果不论什么情况下建立PDP的次数为3次,结束本次连接
+                {
+                    if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                    {
+                        HAL_IWDG_Refresh(&hiwdg);
+                    }
+                    Sim80x_GPRSClose(8);
+                    break;
+                    //加屏幕提示注册未成功
+                    //DisplayChar(1,1,"-Register ERROR-");
+                }
+                if(GPRS_StartUpGPRS()==false)
+                {
+                    connectStep = 6;
+                    TimeForCurrStart = HAL_GetTick();
+                    //DisplayChar(1,1,"-ReRegister ing-");
+                }
+                else
+                {
+                    connectStep = 10;
+                    loopSumCurr = 0;
+                    TimeForCurrStart = HAL_GetTick();//成功的时间
+                }
+                loopSumPDP++;
+                break;
+            case 10:
+                GPRS_GetLocalIP(NULL);
+//                GPRS_ShowGPRSIPD();
+                connectStep = 11;
+                loopSumCurr = 0;
+                if(CONFIG_Meter.NotHaveDog == false && IsNeedRestart == false)
+                {
+                    HAL_IWDG_Refresh(&hiwdg);
+                }
+                TimeForCurrStart = HAL_GetTick();//成功的时间
+                break;
+            case 11:
+								GSM_ON_FLAG = 0;
+								//发送做饭数据，该部分长按或RTC定时发送，
+								//从FLASH中读取数据后，向外发送，直到把FLASH中更新的数据全部上传完成
+								if(IsNeedSendCook == true)  //PostCookingSecsion
+								{
+//									__HAL_RCC_WWDG_CLK_DISABLE();
+									IsNeedSendCook = 0;
+									
+									printf("Long press!\r\n");
+									M26_HTTP_Init();
+//									HAL_IWDG_Refresh(&hiwdg);
+									PostCookingSecsion();
+									GetMeterSettings();
+									u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
+									if(u32GetCmdValue & GET_CMD_STUP)
+									{
+										xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
+										PostMeterSettings();
+									}
+									PostMeterHardware();
+									PostMeterStatus();
+//									HAL_IWDG_Refresh(&hiwdg);
+									printf("GetMeterSettings!\r\n");
+									LL_VCC(1);
+								}
+								else if(IsNeedTimeing ==  true) //PostCookingSecsion
+								{
+									IsNeedTimeing = false;
+									printf("send IsNeedTimeing!\r\n");
+									M26_HTTP_Init();
+									PostCookingSecsion();
+									GetMeterSettings();
+									u32GetCmdValue = xEventGroupGetBits(xGetCmdEventGroup);
+									if(u32GetCmdValue & GET_CMD_STUP)
+									{
+										xEventGroupClearBits( xCreatedEventGroup,GET_CMD_STUP );
+										PostMeterSettings();
+									}
+									PostMeterHardware();
+									PostMeterStatus();
+									printf("end IsNeedTimeing!\r\n");
+									TimeForCurrStart = HAL_GetTick();		
+			
+									HearRetryNumber = 0;
+								}
+								else if(IsNeedWarning == true)//报警信息 PostMeterWarning
+								{
+									printf("send PostMeterWarning!\r\n");
+									M26_HTTP_Init();
+									PostMeterWarning(); 
+									printf("end PostMeterWarning!\r\n");
+//									__HAL_RCC_WWDG_CLK_ENABLE();
+									IsNeedWarning = false;
+									HearRetryNumber = 0;
+								}
+								GPRS_DeactivatePDPContext();
+								Sim80x_GPRSClose(0);
+              break;
+						default:
+							break;
+            }					
+					
 		
 //					if(IsNeedSendCook == true) 
 //					{
@@ -2325,7 +2686,7 @@ void StartDefaultTask(void const * argument)
 
             /* Enable Power Clock*/
             //			__HAL_RCC_PWR_CLK_ENABLE();
-						printf("IntoLowPower\r\n");
+						
             IntoLowPower();
 
             //			RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -2348,7 +2709,9 @@ void StartDefaultTask(void const * argument)
 	#ifdef LWL_DEBUG
 					printf("line %d\r\n",__LINE__);
 	#endif
+//	printf("IntoLowPower\r\n");
             HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+						
 		#ifdef LWL_DEBUG
 					printf("line %d\r\n",__LINE__);
 	#endif					

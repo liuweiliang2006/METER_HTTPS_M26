@@ -418,18 +418,82 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>47</LineNumber>
+          <LineNumber>308</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260108</Address>
+          <Address>134295154</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\GetAnalyse.c</Filename>
+          <Filename>..\Src\signal.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\GasMeter4\../Src/GetAnalyse.c\47</Expression>
+          <Expression>\\GasMeter4\../Src/signal.c\308</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>949</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134287794</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\signal.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\GasMeter4\../Src/signal.c\949</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>307</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134295144</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\signal.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\GasMeter4\../Src/signal.c\307</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>2561</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134313028</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Src/freertos.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\GasMeter4\../Src/freertos.c\2561</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>2562</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134313032</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Src/freertos.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\GasMeter4\../Src/freertos.c\2562</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -487,6 +551,11 @@
           <count>10</count>
           <WinNumber>1</WinNumber>
           <ItemText>CONFIG_Meter,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Sim80x</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

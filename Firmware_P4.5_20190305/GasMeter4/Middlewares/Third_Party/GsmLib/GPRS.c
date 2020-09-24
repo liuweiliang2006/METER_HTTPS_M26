@@ -519,3 +519,22 @@ Error:
     return false;
 }
 #endif
+
+//####################################################################################################
+//设置SNI
+bool  GPRS_SetSni()
+{
+    uint8_t answer;
+
+		answer = Sim80x_SendAtCommand("AT+QSSLCFG=\"sni\",0,1\r\n",2000,1,"\r\nOK\r\n");
+
+    if(answer == 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+

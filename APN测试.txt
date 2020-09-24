@@ -5,11 +5,14 @@ AT   失败三次，关模块   Sim80x_GPRSClose(1);
 APN设置
 		strcmp(CONFIG_GPRS.USE_GPRS_APN, "1")                              串口工具使能APN
 		GPRS_CGDCONT(CONFIG_GPRS.APN) 		  AT+CGDCONT=1,"IP","CMNET"     设置APN 
-
+		sprintf(str,"AT+CGDCONT=1,\"IP\",\"%s\"\r\n",Name);
+		answer = Sim80x_SendAtCommand(str,2000,1,"OK");
 
 PIN设置 设置三次，不成功，并模块 Sim80x_GPRSClose(3);
 		1、返回 SIM PIN 需要配置PIN
-		GPRS_SetPin(CONFIG_GPRS.Pin);  //Sim80x_SendAtCommand("AT+CPIN=\"4294\"\r\n",2000,1,"OK");   串口工具配置PIN
+		GPRS_SetPin(CONFIG_GPRS.Pin);
+		sprintf(str,"AT+CPIN=\"%s\"\r\n",pin);
+		answer = Sim80x_SendAtCommand(str,2000,1,"\r\nOK\r\n");		//Sim80x_SendAtCommand("AT+CPIN=\"4294\"\r\n",2000,1,"OK");   串口工具配置PIN
 		2、返回 READY 不需要配置PIN
 
 
@@ -18,12 +21,12 @@ GPRS网络注册状态 三次不成功，关模块 Sim80x_GPRSClose(4);
 		Sim80x_SendAtCommand("AT+CGREG?\r\n",200,1,"\r\n+CGREG:"); //里面包含1或者5
 
 
-GPRS 附着和分离   三次不成功，关模块
+GPRS 附着和分离   三次不成功，关模块  对返回值无解析
 AT+CGATT=1   OK
 		Sim80x_SendAtCommand("AT+CGATT=1\r\n",4000,1,"\r\nOK\r\n");
 
-
-AT+QIDEACT关闭 GPRS/CSD PDP  场景   
+  
+AT+QIDEACT关闭 GPRS/CSD PDP  场景       返回值无解析 关闭场景
 		Sim80x_SendAtCommand("AT+QIDEACT\r\n",5000,2,"\r\nDEACT OK\r\n","\r\nERROR\r\n");
  
 
@@ -32,14 +35,31 @@ AT+QIREGAPP 启动任务并设置接入点 APN 、用户名和密码
 		if(strcmp(CONFIG_GPRS.USE_GPRS_APN, "1") == 0)
 		{
 			GPRS_SetAPN(CONFIG_GPRS.APN,CONFIG_GPRS.APN_UserName,CONFIG_GPRS.APN_Password);
+			//sprintf(str,"AT+QIREGAPP=\"%s\",\"%s\",\"%s\"\r\n",Name,username,password);
+			//Sim80x_SendAtCommand(str,1000,2,"\r\nOK\r\n","\r\nERROR\r\n");
 		}
 		else
 		{
 			if(GPRS_GetAPN(pAPN,pAPN_UserName,pAPN_Password) == true)
-			{
+			{ //Sim80x_SendAtCommand("AT+QIREGAPP?\r\n",1000,2,"\r\nOK\r\n","\r\nERROR\r\n");
+				
 				GPRS_SetAPN(pAPN,pAPN_UserName,pAPN_Password);
+				//sprintf(str,"AT+QIREGAPP=\"%s\",\"%s\",\"%s\"\r\n",Name,username,password);
+				//Sim80x_SendAtCommand(str,1000,2,"\r\nOK\r\n","\r\nERROR\r\n");
 			}
 		}
 
-answer = Sim80x_SendAtCommand("AT+QIACT\r\n",5000,2,"\r\nOK\r\n","\r\nERROR\r\n");
+AT+QIACT  激活移动场景    无解析处理
+Sim80x_SendAtCommand("AT+QIACT\r\n",5000,2,"\r\nOK\r\n","\r\nERROR\r\n");
 
+
+AT+QILOCIP  获取本地 IP地址
+Sim80x_SendAtCommand("AT+QILOCIP\r\n",1000,2,"\r\nOK\r\n","\r\nERROR\r\n");
+
+AT+QIHEAD  配置接收数据时是否显示IP头
+Sim80x_SendAtCommand("AT+QIHEAD=1\r\n",2000,1,"\r\nOK\r\n");
+
+
+AT+QIOPEN  建立TCP连接或注册UDP端口号 
+sprintf(str,"AT+QIOPEN=\"TCP\",\"%s\",\"%s\"\r\n",CONFIG_GPRS.Server_IP,CONFIG_GPRS.Socket_Port);
+Sim80x_SendAtCommand(str,4000,2,"\r\nCONNECT OK\r\n","ALREADY CONNECT")

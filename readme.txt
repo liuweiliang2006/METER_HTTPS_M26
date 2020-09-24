@@ -99,3 +99,6 @@ if(HAL_GetTick()-TimeForSlowRunGPRSFree > 1500)
 
 20200922 
 字段对接，国内版本可连接AWS，国外版本需要增加APN PIN等设置
+
+20200924 
+加入APN，建立一次通道，实现POST GET
