@@ -1,6 +1,6 @@
 #include "includes.h"
 //#include "cJSON.h"
-enum {WEINA=1,WEISHENG=2}sensor_type;
+enum {WEINA=2,WEISHENG=1}sensor_type;
 
 #define REC_COM_LEN 40  //GET数据的命令长度
 

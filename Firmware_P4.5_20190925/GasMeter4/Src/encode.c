@@ -169,6 +169,7 @@ void encodeMeterStatusPacket(char **sendMeagess,reportStatePacket_t *rPacket)
 void encodeWarningsPacket(char **sendMeagess,waringPacket_t *rPacket)
 {
 	char *cDataTime ;
+	char lowbattery[5];
 	strcat(*sendMeagess,"{\"warningName\":\"Low Gas Warning\"");
 	strcat(*sendMeagess,",");
 	
@@ -217,7 +218,9 @@ void encodeWarningsPacket(char **sendMeagess,waringPacket_t *rPacket)
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"lowBattery\":");
-	strcat(*sendMeagess,rPacket->Low_battery);
+//	strcat(*sendMeagess,rPacket->Low_battery);
+	sscanf(lowbattery,"%.2f",CONFIG_Meter.LowBattery);
+	strcat(*sendMeagess,lowbattery);
 	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"gasTemperature\":");
@@ -407,17 +410,17 @@ void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
 	strcat(*sendMeagess,rPacket->StartPeriod);
 	strcat(*sendMeagess,",");
 	
-	if(stReadMeterConfig.USE_SENSOR[0] == 1) //WEINA?
-	{
-		SPI_FLASH_BufferRead((uint8_t*)(&stReadRealDataCalibration),0,sizeof(REAL_DATA_CALIBRATION_t));
-		sprintf(slope,"%f",stReadRealDataCalibration.slope);
-		sprintf(Intercept,"%f",stReadRealDataCalibration.zero);
-	}
-	else if(stReadMeterConfig.USE_SENSOR[0] == 2) //WEISHENG?
+	if(stReadMeterConfig.USE_SENSOR[0] == '1') //WEISHENG
 	{
 		SPI_FLASH_BufferRead((uint8_t*)(&stReadRealFlowCalibration),4096,sizeof(REAL_Flow_CALIBRATION_t));
 		sprintf(slope,"%f",stReadRealFlowCalibration.ABCDEF[0]);
 		sprintf(Intercept,"%d",stReadRealFlowCalibration.ParamNumber);
+	}
+	else if(stReadMeterConfig.USE_SENSOR[0] =='2') //WEINA
+	{
+		SPI_FLASH_BufferRead((uint8_t*)(&stReadRealDataCalibration),0,sizeof(REAL_DATA_CALIBRATION_t));
+		sprintf(slope,"%f",stReadRealDataCalibration.slope);
+		sprintf(Intercept,"%f",stReadRealDataCalibration.zero);
 	}
 	strcat(*sendMeagess,"\"sensorSlope\":");
 	strcat(*sendMeagess,slope);
@@ -426,6 +429,14 @@ void encodeSettingsPacket(char **sendMeagess,SetupPacket_t *rPacket)
 	strcat(*sendMeagess,"\"sensorIntercept\":");
 	strcat(*sendMeagess,Intercept);
 	strcat(*sendMeagess,",");
+
+//	strcat(*sendMeagess,"\"sensorSlope\":");
+//	strcat(*sendMeagess,"2.3");
+//	strcat(*sendMeagess,",");
+//	
+//	strcat(*sendMeagess,"\"sensorIntercept\":");
+//	strcat(*sendMeagess,"0.1");
+//	strcat(*sendMeagess,",");
 	
 	strcat(*sendMeagess,"\"settingDatestamp\":\"");
 	DataTimeFormat(&cDataTime,rPacket->datetime);

@@ -2728,6 +2728,10 @@ void StartDefaultTask(void const * argument)
 					printf("line %d\r\n",__LINE__);
 	#endif
 					printf("IntoLowPower\r\n");
+					uint32_t lowdelay;
+					__HAL_GPIO_EXTI_CLEAR_IT(0xFFFF);
+					for(lowdelay = 0;lowdelay<=65535;lowdelay++)
+					;
             HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 					printf("jump Low Power\r\n");	
 		#ifdef LWL_DEBUG
